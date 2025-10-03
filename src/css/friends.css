@@ -1,0 +1,44 @@
+.friends-container {
+  flex: 1;
+  margin-top: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.friend-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #d9d9d9;
+  border-radius: 20px;
+  padding: 10px 15px;
+}
+
+.friend-card img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.friend-card span {
+  flex: 1;
+  font-size: 16px;
+}
+
+.chat-btn,
+.options-btn {
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  background: #fff;
+  margin-left: 6px;
+}
+
+.chat-btn:hover,
+.options-btn:hover {
+  background: #ccc;
+}

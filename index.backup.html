@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Friends Page</title>
+  <link rel="stylesheet" href="/home/user/bonfire/src/css/friends.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jeju+Hallasan&display=swap">
+</head>
+<body>
+  <script type="module" src="/src/main.jsx"></script>
+  <div class="container">
+    <!-- Left vertical icon bar -->
+    <div class="icon-bar">
+      <div class="icons-top">
+        <img src="images/search.png" alt="Search">
+        <img src="images/settings.png" alt="Settings">
+        <img src="images/groups.png" alt="Groups">
+        <img src="images/messages.png" alt="Messages">
+      </div>
+      <div class="icons-bottom">
+        <img src="images/profile.png" alt="Profile">
+      </div>
+    </div>
+
+    <!-- Sidebar with DMs -->
+    <div class="sidebar">
+      <h2>Direct Messages</h2>
+      <div class="dm-list">
+        <div class="dm">
+          <img src="images/friend1.png" alt="friend1">
+          <span>friend1</span>
+        </div>
+        <div class="dm">
+          <img src="images/friend2.png" alt="friend2">
+          <span>friend2</span>
+        </div>
+        <div class="dm">
+          <img src="images/friend3.png" alt="friend3">
+          <span>friend3</span>
+        </div>
+        <div class="dm">
+          <img src="images/friend4.png" alt="friend4">
+          <span>friend4</span>
+        </div>
+      </div>
+      <div class="user">
+        <img src="images/user.png" alt="User">
+        <span>User123</span>
+      </div>
+    </div>
+
+    <!-- Main friends list -->
+    <div class="main">
+      <div class="main-header">
+        <img src="images/logo.png" alt="Logo" class="logo">
+        <h1>Friends</h1>
+        <button class="add-friend">Add Friend</button>
+      </div>
+
+      <div class="friends-container">
+        <div class="friend-card">
+          <img src="images/friend1.png" alt="friend1">
+          <span>friend1</span>
+          <button class="chat-btn" itemid="friend1">💬</button>
+          <button class="options-btn">⋮</button>
+        </div>
+
+        <div class="friend-card">
+          
+          <img src="images/friend2.png" alt="friend2">
+          <span>friend2</span>
+          <button class="chat-btn" itemid="friend2">💬</button>
+          <button class="options-btn">⋮</button>
+        </div>
+
+        <div class="friend-card">
+          <img src="images/friend3.png" alt="friend3">
+          <span>friend3</span>
+          <button class="chat-btn" itemid="friend3">💬</button>
+          <button class="options-btn">⋮</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
