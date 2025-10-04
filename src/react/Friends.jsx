@@ -2,6 +2,8 @@ import React from 'react';
 import '../css/friends.css';
 import { useNavigate } from 'react-router-dom';
 import useFriends from './hooks/useFriends';
+import { auth } from '../firebase';
+import { signOut } from "firebase/auth";
 
 // FriendCard component
 const FriendCard = ({ friend, onChatClick }) => (
@@ -21,6 +23,16 @@ function Friends() {
     navigate(`/chat?friendId=${friendId}`);
   };
 
+  const handleSignOut = () => {
+    signOut(auth).then(() => {
+      // Sign-out successful.
+      navigate('/'); // Redirect to login or home page
+    }).catch((error) => {
+      // An error happened.
+      console.error("Sign out error:", error);
+    });
+  };
+
   if (loading) {
     return <div>Loading friends...</div>;
   }
@@ -35,6 +47,7 @@ function Friends() {
             <img src="/images/logo.png" alt="Logo" className="logo" />
             <h1>Friends</h1>
             <button className="add-friend">Add Friend</button>
+            <button onClick={handleSignOut} className="sign-out-btn">Sign Out</button>
       </div>
       {friends.length === 0 ? (
         <div className="no-friends-message">

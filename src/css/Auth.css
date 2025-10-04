@@ -1,31 +1,56 @@
+/* src/css/Auth.css */
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+
 .auth-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
-    background-color: #f0f2f5;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    font-family: 'Poppins', sans-serif;
 }
 
 .auth-form {
-    padding: 40px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    padding: 50px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.18);
     width: 100%;
-    max-width: 400px;
+    max-width: 420px;
+    text-align: center;
+    color: white;
+}
+
+.auth-logo {
+    width: 100px;
+    margin-bottom: 20px;
 }
 
 .auth-form h2 {
-    margin-bottom: 24px;
-    text-align: center;
+    margin-bottom: 30px;
+    font-weight: 600;
+    font-size: 28px;
 }
 
 .auth-form input {
     width: 100%;
-    padding: 12px;
-    margin-bottom: 16px;
-    border-radius: 4px;
-    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 10px;
+    border: none;
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    font-size: 16px;
+    outline: none;
+    box-sizing: border-box;
+}
+
+.auth-form input::placeholder {
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .button-group {
@@ -35,31 +60,45 @@
 
 .auth-form button {
     width: 100%;
-    padding: 12px;
+    padding: 15px;
     border: none;
-    background-color: #007bff;
+    background: linear-gradient(135deg, #ff8c42 0%, #ff4b2b 100%);
     color: white;
-    border-radius: 4px;
+    border-radius: 10px;
     cursor: pointer;
-    transition: background-color 0.3s;
+    transition: all 0.3s ease;
+    font-size: 18px;
+    font-weight: 600;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
 .auth-form button:hover {
-    background-color: #0056b3;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
 }
 
 .toggle-auth-mode {
-    margin-top: 20px;
+    margin-top: 25px;
     background: none;
     border: none;
-    color: #007bff;
+    color: rgba(255, 255, 255, 0.8);
     cursor: pointer;
     text-align: center;
     width: 100%;
+    font-size: 14px;
+    transition: color 0.3s;
+}
+
+.toggle-auth-mode:hover {
+    color: white;
 }
 
 .error-message {
-    color: #dc3545;
-    margin-bottom: 15px;
+    color: #ff4b2b;
+    background: rgba(255, 255, 255, 0.2);
+    padding: 10px;
+    border-radius: 8px;
+    margin-bottom: 20px;
     text-align: center;
+    font-weight: 600;
 }
