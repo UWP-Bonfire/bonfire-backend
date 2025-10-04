@@ -96,6 +96,7 @@ function Auth() {
     return (
         <div className="auth-container">
             <div className="auth-form">
+                <img src="/images/logo.png" alt="Bonfire" className="auth-logo" />
                 <h2>{isSignUp ? 'Create an Account' : 'Welcome Back'}</h2>
                 <AuthForm 
                     isSignUp={isSignUp}
