@@ -74,14 +74,13 @@ const AuthForm = ({ isSignUp, onSubmit, error, loading }) => {
     };
 
     return (
-        <form onSubmit={handleSubmit} className="auth-form-fields">
+        <form onSubmit={handleSubmit}>
             <input 
                 type="email" 
                 value={email} 
                 onChange={(e) => setEmail(e.target.value)} 
                 placeholder="Email"
                 required
-                className="auth-input"
             />
             <input 
                 type="password" 
@@ -89,10 +88,9 @@ const AuthForm = ({ isSignUp, onSubmit, error, loading }) => {
                 onChange={(e) => setPassword(e.target.value)} 
                 placeholder="Password"
                 required
-                className="auth-input"
             />
             {error && <p className="error-message">{error}</p>}
-            <button type="submit" className="auth-button" disabled={loading}>
+            <button type="submit" disabled={loading}>
                 {loading ? 'Processing...' : (isSignUp ? 'Sign Up' : 'Sign In')}
             </button>
         </form>
@@ -113,11 +111,11 @@ function Auth() {
 
     return (
         <div className="auth-container">
-            <div className="auth-card">
+            <div className="auth-form">
                 <Link to="/" className="back-to-home">
                     &larr; Back to Home
                 </Link>
-                <img src="/images/logo.png" alt="Bonfire" className="auth-logo" />
+                <img src="/vite.svg" alt="Bonfire" className="auth-logo" />
                 <h2>{isSignUp ? 'Create an Account' : 'Welcome Back'}</h2>
                 <p>{isSignUp ? 'Join the community!' : 'Sign in to continue'}</p>
                 <AuthForm 
