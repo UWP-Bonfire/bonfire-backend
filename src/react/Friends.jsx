@@ -33,6 +33,10 @@ function Friends() {
     });
   };
 
+  const handleAddFriend = () => {
+    navigate('/add-friend');
+  };
+
   if (loading) {
     return <div>Loading friends...</div>;
   }
@@ -46,7 +50,7 @@ function Friends() {
         <div className="main-header">
             <img src="/images/logo.png" alt="Logo" className="logo" />
             <h1>Friends</h1>
-            <button className="add-friend">Add Friend</button>
+            <button onClick={handleAddFriend} className="add-friend">Add Friend</button>
             <button onClick={handleSignOut} className="sign-out-btn">Sign Out</button>
       </div>
       {friends.length === 0 ? (

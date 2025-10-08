@@ -1,8 +1,9 @@
 import React from 'react';
-import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Auth from './Auth';
 import Chat from './Chat';
 import Friends from './Friends';
+import AddFriend from './AddFriend'; // Import the AddFriend component
 import Layout from './Layout';
 import { useAuth } from './hooks/useAuth';
 
@@ -17,15 +18,17 @@ const App = () => {
         <Routes>
             <Route path="/auth" element={user ? <Navigate to="/" /> : <Auth />} />
             <Route 
-                path="/" 
+                path="/"
                 element={
                     <ProtectedRoute user={user}>
                         <Layout />
                     </ProtectedRoute>
                 }
             >
+                {/* Nested routes that use the Layout component */}
                 <Route index element={<Friends />} />
                 <Route path="chat" element={<Chat />} />
+                <Route path="add-friend" element={<AddFriend />} /> {/* Add the route for AddFriend */}
             </Route>
         </Routes>
     );

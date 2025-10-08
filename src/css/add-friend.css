@@ -1,0 +1,71 @@
+.add-friend-container {
+    max-width: 500px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    text-align: center;
+}
+
+.add-friend-container h2 {
+    font-size: 28px;
+    color: #333;
+    margin-bottom: 10px;
+}
+
+.add-friend-container p {
+    font-size: 16px;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.add-friend-form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.add-friend-input {
+    width: 100%;
+    padding: 14px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.add-friend-input:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+}
+
+.add-friend-button {
+    padding: 14px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.2s, box-shadow 0.2s;
+}
+
+.add-friend-button:hover {
+    background-color: #0056b3;
+    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+}
+
+.success-message {
+    margin-top: 20px;
+    color: #28a745;
+    font-weight: 500;
+}
+
+.error-message {
+    margin-top: 20px;
+    color: #d93025;
+    font-weight: 500;
+}
