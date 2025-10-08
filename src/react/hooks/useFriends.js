@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { ref, onValue } from 'firebase/database';
-import { db } from '../../firebase';
+import { collection, onSnapshot } from 'firebase/firestore';
+import { firestore } from '../../firebase';
 
 const useFriends = () => {
     const [friends, setFriends] = useState([]);
@@ -8,11 +8,10 @@ const useFriends = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const friendsRef = ref(db, 'users'); // Assuming 'users' is the path to friends
-        const unsubscribe = onValue(friendsRef, (snapshot) => {
-            const data = snapshot.val();
-            if (data) {
-                const friendsList = Object.keys(data).map(key => ({ id: key, ...data[key] }));
+        const friendsCollection = collection(firestore, 'users');
+        const unsubscribe = onSnapshot(friendsCollection, (snapshot) => {
+            if (!snapshot.empty) {
+                const friendsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
                 setFriends(friendsList);
             } else {
                 setFriends([]);

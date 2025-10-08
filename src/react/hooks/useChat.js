@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from './useAuth';
-import { db } from '../../firebase';
-import { ref, onValue, push, serverTimestamp, query, orderByChild } from 'firebase/database';
+import { firestore } from '../../firebase';
+import { collection, query, orderBy, onSnapshot, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const useChat = (friendId) => {
     const { user } = useAuth();
@@ -20,12 +20,13 @@ const useChat = (friendId) => {
 
         const chatId = friendId ? getChatId(user.uid, friendId) : 'global';
         const messagesPath = friendId ? `chats/${chatId}/messages` : 'messages';
-        const messagesRef = query(ref(db, messagesPath), orderByChild("timestamp"));
+        const messagesRef = collection(firestore, messagesPath);
+        const q = query(messagesRef, orderBy("timestamp"));
 
-        const unsubscribe = onValue(messagesRef, (snapshot) => {
+        const unsubscribe = onSnapshot(q, (querySnapshot) => {
             const messagesData = [];
-            snapshot.forEach((childSnapshot) => {
-                messagesData.push({ id: childSnapshot.key, ...childSnapshot.val() });
+            querySnapshot.forEach((doc) => {
+                messagesData.push({ id: doc.id, ...doc.data() });
             });
             setMessages(messagesData);
             setLoading(false);
@@ -42,10 +43,10 @@ const useChat = (friendId) => {
 
         const chatId = friendId ? getChatId(user.uid, friendId) : 'global';
         const messagesPath = friendId ? `chats/${chatId}/messages` : 'messages';
-        const messagesRef = ref(db, messagesPath);
+        const messagesRef = collection(firestore, messagesPath);
 
         try {
-            await push(messagesRef, {
+            await addDoc(messagesRef, {
                 text,
                 timestamp: serverTimestamp(),
                 uid: user.uid,

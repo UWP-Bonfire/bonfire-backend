@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
-import { db } from '../firebase';
-import { ref, set, get, serverTimestamp } from 'firebase/database'; // Updated imports for Realtime Database
+import { useNavigate } from 'react-router-dom';
+import { firestore } from '../firebase';
+import { collection, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from './hooks/useAuth';
 import '../css/add-friend.css';
 
@@ -9,6 +10,11 @@ function AddFriend() {
     const [recipientId, setRecipientId] = useState('');
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
+    const navigate = useNavigate();
+
+    const handleGoBack = () => {
+        navigate('/');
+    };
 
     const handleSendRequest = async (e) => {
         e.preventDefault();
@@ -28,19 +34,19 @@ function AddFriend() {
         }
 
         try {
-            // Check if the user exists in the Realtime Database
-            const userRef = ref(db, 'users/' + trimmedId);
-            const userSnapshot = await get(userRef);
+            // Check if the user exists in Firestore
+            const userRef = doc(firestore, 'users', trimmedId);
+            const userSnapshot = await getDoc(userRef);
             if (!userSnapshot.exists()) {
                 setError('A user with this ID does not exist.');
                 return;
             }
 
-            // Create a new friend request in the Realtime Database
+            // Create a new friend request in Firestore
             const requestId = `${currentUser.uid}_${trimmedId}`;
-            const requestRef = ref(db, 'friendRequests/' + requestId);
+            const requestRef = doc(firestore, 'friendRequests', requestId);
 
-            await set(requestRef, {
+            await setDoc(requestRef, {
                 from: currentUser.uid,
                 to: trimmedId,
                 status: 'pending',
@@ -57,6 +63,9 @@ function AddFriend() {
 
     return (
         <div className="add-friend-container">
+            <button onClick={handleGoBack} className="back-button">
+                &larr; Back
+            </button>
             <h2>Add a Friend</h2>
             <p>Enter the user ID of the person you want to add.</p>
             <form onSubmit={handleSendRequest} className="add-friend-form">
@@ -64,9 +73,9 @@ function AddFriend() {
                     type="text"
                     value={recipientId}
                     onChange={(e) => setRecipientId(e.target.value)}
-                    placeholder="Enter friend\'s User ID"
+                    placeholder="Enter friend's User ID"
                     className="add-friend-input"
-                    aria-label="Friend\'s User ID"
+                    aria-label="Friend's User ID"
                 />
                 <button type="submit" className="add-friend-button">Send Request</button>
             </form>

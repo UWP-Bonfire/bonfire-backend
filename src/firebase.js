@@ -1,12 +1,10 @@
-
 import { initializeApp } from "firebase/app";
-import { getDatabase } from "firebase/database";
 import { getAuth } from "firebase/auth";
+import { getFirestore, enableNetwork } from "firebase/firestore";
 
 const firebaseConfig = {
   projectId: "bonfire-d8db1",
   appId: "1:474303125087:web:5975834a255a3352b16dea",
-  databaseURL: "https://bonfire-d8db1-default-rtdb.firebaseio.com",
   storageBucket: "bonfire-d8db1.firebasestorage.app",
   apiKey: "AIzaSyBNYJONgRNxNMcKgeCDrFQfWH4S8Lw2zYo",
   authDomain: "bonfire-d8db1.firebaseapp.com",
@@ -16,7 +14,10 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
 const auth = getAuth(app);
+const firestore = getFirestore(app);
 
-export { db, auth };
+// Explicitly enable the network for Firestore
+enableNetwork(firestore);
+
+export { auth, firestore };

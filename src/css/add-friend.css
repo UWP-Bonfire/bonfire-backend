@@ -6,7 +6,24 @@
     border-radius: 12px;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
     text-align: center;
+    position: relative; /* Add this for positioning the back button */
 }
+
+.back-button {
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: #007bff;
+}
+
+.back-button:hover {
+    color: #0056b3;
+}
+
 
 .add-friend-container h2 {
     font-size: 28px;

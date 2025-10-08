@@ -1,29 +1,16 @@
 import React, { useState } from 'react';
-import { auth } from '../firebase';
+import { auth, firestore } from '../firebase';
 import { 
     createUserWithEmailAndPassword, 
     signInWithEmailAndPassword 
 } from "firebase/auth";
+import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import '../css/Auth.css';
 
 // Custom hook for authentication
 const useAuthentication = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
-
-    const handleAuthAction = async (action, email, password) => {
-        setLoading(true);
-        setError('');
-        try {
-            await action(auth, email, password);
-        } catch (error) {
-            setError(getFriendlyErrorMessage(error.code));
-        }
-        setLoading(false);
-    };
-
-    const signUp = (email, password) => handleAuthAction(createUserWithEmailAndPassword, email, password);
-    const signIn = (email, password) => handleAuthAction(signInWithEmailAndPassword, email, password);
 
     // Translate Firebase error codes into user-friendly messages
     const getFriendlyErrorMessage = (errorCode) => {
@@ -40,6 +27,36 @@ const useAuthentication = () => {
             default:
                 return 'An unexpected error occurred. Please try again.';
         }
+    };
+
+    const signUp = async (email, password) => {
+        setLoading(true);
+        setError('');
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            if (userCredential && userCredential.user) {
+                const user = userCredential.user;
+                const userRef = doc(firestore, 'users', user.uid);
+                await setDoc(userRef, {
+                    email: user.email,
+                    createdAt: serverTimestamp()
+                });
+            }
+        } catch (error) {
+            setError(getFriendlyErrorMessage(error.code));
+        }
+        setLoading(false);
+    };
+
+    const signIn = async (email, password) => {
+        setLoading(true);
+        setError('');
+        try {
+            await signInWithEmailAndPassword(auth, email, password);
+        } catch (error) {
+            setError(getFriendlyErrorMessage(error.code));
+        }
+        setLoading(false);
     };
 
     return { signUp, signIn, error, loading };
@@ -108,7 +125,7 @@ function Auth() {
                     className="toggle-auth-mode"
                     disabled={loading}
                 >
-                    {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
+                    {isSignUp ? 'Already have an account? Sign In' : "Don\'t have an account? Sign Up"}
                 </button>
             </div>
         </div>
