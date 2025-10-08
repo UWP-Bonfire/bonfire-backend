@@ -1,12 +1,23 @@
+/* Add Friend Container */
 .add-friend-container {
-    max-width: 500px;
-    margin: 50px auto;
-    padding: 30px;
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+    padding: 20px;
+}
+
+/* Add Friend Card */
+.add-friend-card {
+    background-color: #34495e;
+    padding: 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
     text-align: center;
-    position: relative; /* Add this for positioning the back button */
+    width: 100%;
+    max-width: 500px;
+    position: relative;
 }
 
 .back-button {
@@ -15,28 +26,28 @@
     left: 20px;
     background: none;
     border: none;
-    font-size: 24px;
+    color: #bdc3c7;
+    font-size: 0.9em;
     cursor: pointer;
-    color: #007bff;
+    transition: color 0.3s;
 }
 
 .back-button:hover {
-    color: #0056b3;
+    color: #e74c3c;
 }
 
-
-.add-friend-container h2 {
-    font-size: 28px;
-    color: #333;
+.add-friend-card h2 {
+    font-size: 2em;
+    color: #fff;
     margin-bottom: 10px;
 }
 
-.add-friend-container p {
-    font-size: 16px;
-    color: #666;
+.add-friend-card p {
+    color: #bdc3c7;
     margin-bottom: 30px;
 }
 
+/* Add Friend Form */
 .add-friend-form {
     display: flex;
     flex-direction: column;
@@ -44,45 +55,56 @@
 }
 
 .add-friend-input {
-    width: 100%;
-    padding: 14px;
-    font-size: 16px;
-    border: 1px solid #ccc;
+    background-color: #2c3e50;
+    color: #f5f5f5;
+    border: 1px solid #4a6278;
     border-radius: 8px;
-    transition: border-color 0.2s, box-shadow 0.2s;
+    padding: 15px;
+    font-size: 1em;
+    transition: border-color 0.3s, box-shadow 0.3s;
 }
 
 .add-friend-input:focus {
     outline: none;
-    border-color: #007bff;
-    box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
+    border-color: #e74c3c;
+    box-shadow: 0 0 10px rgba(231, 76, 60, 0.3);
 }
 
+/* Add Friend Button */
 .add-friend-button {
-    padding: 14px;
-    font-size: 16px;
-    font-weight: 600;
-    color: #fff;
-    background-color: #007bff;
+    background-color: #e74c3c;
+    color: white;
     border: none;
     border-radius: 8px;
+    padding: 15px;
+    font-size: 1.1em;
+    font-weight: bold;
     cursor: pointer;
-    transition: background-color 0.2s, box-shadow 0.2s;
+    transition: background-color 0.3s, transform 0.3s;
 }
 
 .add-friend-button:hover {
-    background-color: #0056b3;
-    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+    background-color: #c0392b;
+    transform: translateY(-2px);
+}
+
+/* Feedback Messages */
+.success-message, .error-message {
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 20px;
+    font-size: 0.9em;
+    text-align: center;
 }
 
 .success-message {
-    margin-top: 20px;
-    color: #28a745;
-    font-weight: 500;
+    color: #2ecc71;
+    background-color: rgba(46, 204, 113, 0.1);
+    border: 1px solid #2ecc71;
 }
 
 .error-message {
-    margin-top: 20px;
-    color: #d93025;
-    font-weight: 500;
+    color: #e74c3c;
+    background-color: rgba(231, 76, 60, 0.1);
+    border: 1px solid #e74c3c;
 }

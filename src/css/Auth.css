@@ -7,22 +7,19 @@
     justify-content: center;
     align-items: center;
     min-height: 100vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
     font-family: 'Poppins', sans-serif;
 }
 
 .auth-form {
     padding: 50px;
-    background: rgba(255, 255, 255, 0.1);
+    background: white;
     border-radius: 20px;
-    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.17);
     width: 100%;
     max-width: 420px;
     text-align: center;
-    color: white;
+    color: #333;
 }
 
 .auth-logo {
@@ -41,16 +38,16 @@
     padding: 15px;
     margin-bottom: 20px;
     border-radius: 10px;
-    border: none;
-    background: rgba(255, 255, 255, 0.2);
-    color: white;
+    border: 1px solid #ddd;
+    background: #f9f9f9;
+    color: #333;
     font-size: 16px;
     outline: none;
     box-sizing: border-box;
 }
 
 .auth-form input::placeholder {
-    color: rgba(255, 255, 255, 0.7);
+    color: #aaa;
 }
 
 .button-group {
@@ -62,7 +59,7 @@
     width: 100%;
     padding: 15px;
     border: none;
-    background: linear-gradient(135deg, #ff8c42 0%, #ff4b2b 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     border-radius: 10px;
     cursor: pointer;
@@ -81,7 +78,7 @@
     margin-top: 25px;
     background: none;
     border: none;
-    color: rgba(255, 255, 255, 0.8);
+    color: #555;
     cursor: pointer;
     text-align: center;
     width: 100%;
@@ -90,12 +87,12 @@
 }
 
 .toggle-auth-mode:hover {
-    color: white;
+    color: #000;
 }
 
 .error-message {
-    color: #ff4b2b;
-    background: rgba(255, 255, 255, 0.2);
+    color: #d9534f;
+    background: rgba(217, 83, 79, 0.1);
     padding: 10px;
     border-radius: 8px;
     margin-bottom: 20px;

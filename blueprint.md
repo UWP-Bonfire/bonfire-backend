@@ -1,42 +1,67 @@
-# Project Blueprint
+# Bonfire App Blueprint
 
-## Purpose and Capabilities
+## Overview
 
-This project is a real-time chat application designed to provide a seamless and engaging communication experience. Users can create an account, log in, add friends, and engage in private conversations. The application prioritizes a clean, modern, and intuitive user interface, making it easy for users to connect and communicate.
+Bonfire is a modern social messaging application designed for real-time communication. It features a clean, intuitive interface and a robust set of features that make it easy to connect with friends and build communities.
 
-## Project Outline
+## Project Structure
 
-### Core Features
+- `src/`
+  - `react/`: Contains all React components.
+    - `App.jsx`: The main application component, responsible for routing.
+    - `Auth.jsx`: Handles user authentication (sign-up and sign-in).
+    - `Home.jsx`: The landing page of the application.
+    - `Chat.jsx`: The chat interface.
+    - `Friends.jsx`: Displays the user's list of friends and incoming friend requests.
+    - `AddFriend.jsx`: Allows users to send friend requests.
+    - `FriendRequests.jsx`: Displays and manages incoming friend requests.
+    - `Layout.jsx`: The main layout for the authenticated part of the app.
+    - `Nav.jsx`: The vertical navigation bar.
+    - `hooks/`: Contains custom React hooks.
+      - `useAuth.js`: A hook for managing user authentication state.
+      - `useFriends.js`: A hook for fetching and managing the user's friends list.
+      - `useFriendRequests.js`: A hook for managing friend requests.
+  - `css/`: Contains all CSS stylesheets.
+    - `Home.css`: Styles for the landing page.
+    - `Auth.css`: Styles for the authentication forms.
+    - `Nav.css`: Styles for the navigation bar.
+    - `friends.css`: Styles for the friends list and friend requests.
+    - `add-friend.css`: Styles for the add friend page.
+    - `FriendRequests.css`: Styles for the friend requests component.
+  - `firebase.js`: Initializes and configures the Firebase SDK.
+- `public/`: Contains static assets, including `index.html` and images.
 
-*   **User Authentication:** Secure user sign-up and login functionality using Firebase Authentication.
-*   **Friend Management:** Users can view a list of their friends and add new friends. 
-*   **Real-time Chat:** Instant messaging with friends, powered by Firebase Firestore for real-time data synchronization.
-*   **Protected Routes:** Certain routes are protected, accessible only to authenticated users.
+## Features
 
-### Design and Styling
+- **User Authentication**: Users can sign up and sign in with their email and password.
+- **Real-time Messaging**: Instant messaging with friends.
+- **Friend Request System**: Users can send, receive, accept, and decline friend requests.
+- **Friend Management**: Users can view their friends list.
+- **Modern Design**: A clean, visually appealing interface that is consistent across the application.
 
-*   **Modern Aesthetics:** The application features a modern and visually appealing design, with a focus on clean layouts, balanced spacing, and a polished look and feel.
-*   **Component-Based Styling:** Each component has its own dedicated CSS file for modular and maintainable styling.
-*   **Responsive Layout:** The layout is designed to be responsive and adaptable to different screen sizes.
-*   **Visual Elements:**
-    *   **Color Palette:** A clean and modern color scheme is used to create a visually pleasing experience.
-    *   **Typography:** Clear and readable fonts are used to enhance readability.
-    *   **Iconography:** Icons are used to improve usability and visual appeal.
+## Routing
 
-### Implemented Components
+The application uses `react-router-dom` for routing. The main routes are:
 
-*   `App.jsx`: The main application component, responsible for routing and overall layout.
-*   `Auth.jsx`: Handles user authentication (sign-up and login).
-*   `Chat.jsx`: The component for real-time chat between users.
-*   `Friends.jsx`: Displays the user's list of friends.
-*   `Layout.jsx`: A layout component that provides a consistent structure for the application.
-*   `Sidebar.jsx`: A sidebar component for navigation and displaying direct messages.
+- `/`: The landing page (`Home.jsx`).
+- `/auth`: The authentication page (`Auth.jsx`).
+- `/app`: The main application, which is a protected route.
+  - `/app/friends`: The friends list and friend requests page.
+  - `/app/chat`: The chat interface.
+  - `/app/add-friend`: The page for adding new friends.
 
-### Hooks
+## Styling
 
-*   `useAuth.js`: A custom hook for managing user authentication state.
-*   `useFriends.js`: A custom hook for fetching and managing the user's friends list.
+The application uses a combination of CSS stylesheets to create a modern and consistent design. Key design elements include:
 
-## Current Request
+- A dark theme with a red accent color.
+- A clean and spacious layout.
+- Custom styling for forms, buttons, and navigation elements.
 
-*(No active request)*
+## Friend Request System
+
+The friend request system is implemented using a `friendRequests` collection in Firestore. When a user sends a friend request, a new document is created in this collection. The recipient can then view their pending requests and either accept or decline them.
+
+- **Sending Requests**: The `AddFriend.jsx` component now creates a new document in the `friendRequests` collection with a status of `pending`.
+- **Viewing Requests**: The `FriendRequests.jsx` component fetches and displays all pending friend requests for the current user.
+- **Accepting/Declining Requests**: The `useFriendRequests.js` hook provides the logic for accepting and declining friend requests. When a request is accepted, the two users are added to each other's `friends` list in the `users` collection, and the friend request document is deleted. When a request is declined, the friend request document is deleted.

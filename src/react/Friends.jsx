@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import useFriends from './hooks/useFriends';
 import { auth } from '../firebase';
 import { signOut } from "firebase/auth";
+import FriendRequests from './FriendRequests'; // Import FriendRequests
 
 // FriendCard component
 const FriendCard = ({ friend, onChatClick }) => (
@@ -20,21 +21,19 @@ function Friends() {
   const navigate = useNavigate();
 
   const handleChatClick = (friendId) => {
-    navigate(`/chat?friendId=${friendId}`);
+    navigate(`/app/chat?friendId=${friendId}`);
   };
 
   const handleSignOut = () => {
     signOut(auth).then(() => {
-      // Sign-out successful.
-      navigate('/'); // Redirect to login or home page
+      navigate('/'); 
     }).catch((error) => {
-      // An error happened.
       console.error("Sign out error:", error);
     });
   };
 
   const handleAddFriend = () => {
-    navigate('/add-friend');
+    navigate('/app/add-friend');
   };
 
   if (loading) {
@@ -53,18 +52,23 @@ function Friends() {
             <button onClick={handleAddFriend} className="add-friend">Add Friend</button>
             <button onClick={handleSignOut} className="sign-out-btn">Sign Out</button>
       </div>
-      {friends.length === 0 ? (
-        <div className="no-friends-message">
-            <h2>No friends yet!</h2>
-            <p>Click the "Add Friend" button to start connecting with people.</p>
+      <div className="friends-content">
+        <FriendRequests />
+        <div className="friends-list-container">
+            <h3>Your Friends</h3>
+            {friends.length === 0 ? (
+                <div className="no-friends-message">
+                    <p>You haven't added any friends yet. Use the "Add Friend" button to connect with others.</p>
+                </div>
+            ) : (
+                <div className="friends-container">
+                    {friends.map(friend => (
+                        <FriendCard key={friend.id} friend={friend} onChatClick={handleChatClick} />
+                    ))}
+                </div>
+            )}
         </div>
-      ) : (
-        <div className="friends-container">
-            {friends.map(friend => (
-                <FriendCard key={friend.id} friend={friend} onChatClick={handleChatClick} />
-            ))}
-        </div>
-      )}
+      </div>
     </div>
   );
 }

@@ -13,7 +13,7 @@ function AddFriend() {
     const navigate = useNavigate();
 
     const handleGoBack = () => {
-        navigate('/');
+        navigate('/app/friends');
     };
 
     const handleSendRequest = async (e) => {
@@ -34,7 +34,6 @@ function AddFriend() {
         }
 
         try {
-            // Check if the user exists in Firestore
             const userRef = doc(firestore, 'users', trimmedId);
             const userSnapshot = await getDoc(userRef);
             if (!userSnapshot.exists()) {
@@ -42,7 +41,6 @@ function AddFriend() {
                 return;
             }
 
-            // Create a new friend request in Firestore
             const requestId = `${currentUser.uid}_${trimmedId}`;
             const requestRef = doc(firestore, 'friendRequests', requestId);
 
@@ -63,24 +61,26 @@ function AddFriend() {
 
     return (
         <div className="add-friend-container">
-            <button onClick={handleGoBack} className="back-button">
-                &larr; Back
-            </button>
-            <h2>Add a Friend</h2>
-            <p>Enter the user ID of the person you want to add.</p>
-            <form onSubmit={handleSendRequest} className="add-friend-form">
-                <input
-                    type="text"
-                    value={recipientId}
-                    onChange={(e) => setRecipientId(e.target.value)}
-                    placeholder="Enter friend's User ID"
-                    className="add-friend-input"
-                    aria-label="Friend's User ID"
-                />
-                <button type="submit" className="add-friend-button">Send Request</button>
-            </form>
-            {message && <p className="success-message">{message}</p>}
-            {error && <p className="error-message">{error}</p>}
+            <div className="add-friend-card">
+                <button onClick={handleGoBack} className="back-button">
+                    &larr; Back to Friends
+                </button>
+                <h2>Connect with Others</h2>
+                <p>Enter the user ID of the person you want to connect with. You can find your user ID in your profile.</p>
+                <form onSubmit={handleSendRequest} className="add-friend-form">
+                    <input
+                        type="text"
+                        value={recipientId}
+                        onChange={(e) => setRecipientId(e.target.value)}
+                        placeholder="Enter a User ID"
+                        className="add-friend-input"
+                        aria-label="Friend's User ID"
+                    />
+                    <button type="submit" className="add-friend-button">Send Friend Request</button>
+                </form>
+                {message && <p className="success-message">{message}</p>}
+                {error && <p className="error-message">{error}</p>}
+            </div>
         </div>
     );
 }
