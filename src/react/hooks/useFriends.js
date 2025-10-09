@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { collection, onSnapshot } from 'firebase/firestore';
-import { firestore } from '../../firebase';
+import { firestore, auth } from '../../firebase';
 
 const useFriends = () => {
     const [friends, setFriends] = useState([]);
@@ -8,22 +8,36 @@ const useFriends = () => {
     const [error, setError] = useState(null);
 
     useEffect(() => {
-        const friendsCollection = collection(firestore, 'users');
-        const unsubscribe = onSnapshot(friendsCollection, (snapshot) => {
-            if (!snapshot.empty) {
-                const friendsList = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                setFriends(friendsList);
+        let unsubscribeFromFriends;
+
+        const unsubscribeFromAuth = auth.onAuthStateChanged(user => {
+            if (user) {
+                const usersCollection = collection(firestore, 'users');
+                unsubscribeFromFriends = onSnapshot(usersCollection, (snapshot) => {
+                    const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    const otherUsers = users.filter(u => u.id !== user.uid);
+                    setFriends(otherUsers);
+                    setLoading(false);
+                }, (err) => {
+                    console.error(err);
+                    setError("Couldn't fetch friends.");
+                    setLoading(false);
+                });
             } else {
+                if (unsubscribeFromFriends) {
+                    unsubscribeFromFriends();
+                }
                 setFriends([]);
+                setLoading(false);
             }
-            setLoading(false);
-        }, (err) => {
-            setError("Couldn't fetch friends. Please try again later.");
-            setLoading(false);
-            console.error(err);
         });
 
-        return () => unsubscribe();
+        return () => {
+            unsubscribeFromAuth();
+            if (unsubscribeFromFriends) {
+                unsubscribeFromFriends();
+            }
+        };
     }, []);
 
     return { friends, loading, error };
