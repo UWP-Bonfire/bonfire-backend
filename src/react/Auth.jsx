@@ -120,7 +120,7 @@ function Auth() {
                 <Link to="/" className="back-to-home">
                     &larr; Back to Home
                 </Link>
-                <img src="/vite.svg" alt="Bonfire" className="auth-logo" />
+                <img src="/images/Logo.png" alt="Bonfire" className="auth-logo" />
                 <h2>{isSignUp ? 'Create an Account' : 'Welcome Back'}</h2>
                 <p>{isSignUp ? 'Join the community!' : 'Sign in to continue'}</p>
                 <AuthForm 

@@ -8,7 +8,7 @@ function Home() {
         <div className="home-container">
             <header className="header">
                 <nav className="navbar">
-                    <img src="/images/logo.png" alt="Bonfire Logo" className="logo" />
+                    <img src="/images/Logo.png" alt="Bonfire Logo" className="logo" />
                     <Link to="/auth" className="login-button">Login</Link>
                 </nav>
                 <div className="hero-section">

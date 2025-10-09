@@ -47,7 +47,7 @@ function Friends() {
   return (
     <div className="main">
         <div className="main-header">
-            <img src="/images/logo.png" alt="Logo" className="logo" />
+            <img src="/images/Logo.png" alt="Logo" className="logo" />
             <h1>Friends</h1>
             <button onClick={handleAddFriend} className="add-friend">Add Friend</button>
             <button onClick={handleSignOut} className="sign-out-btn">Sign Out</button>
