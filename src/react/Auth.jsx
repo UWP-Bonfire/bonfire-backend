@@ -6,7 +6,7 @@ import {
     createUserWithEmailAndPassword, 
     signInWithEmailAndPassword 
 } from "firebase/auth";
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, getDocs, collection } from 'firebase/firestore';
 import '../css/Auth.css';
 
 const useAuthentication = () => {
@@ -37,11 +37,16 @@ const useAuthentication = () => {
             if (userCredential && userCredential.user) {
                 const user = userCredential.user;
                 const userRef = doc(firestore, 'users', user.uid);
+
+                const usersCollectionRef = collection(firestore, 'users');
+                const querySnapshot = await getDocs(usersCollectionRef);
+                const userCount = querySnapshot.size;
+
                 await setDoc(userRef, {
                     email: user.email,
                     createdAt: serverTimestamp(),
-                    name: email.split('@')[0], // Add a default name
-                    avatar: `https://api.dicebear.com/7.x/initials/svg?seed=${email}` // Add a default avatar
+                    name: `User ${userCount + 1}`,
+                    avatar: '/images/Default PFP.jpg'
                 });
             }
         } catch (error) {
