@@ -6,7 +6,7 @@ import {
     createUserWithEmailAndPassword, 
     signInWithEmailAndPassword 
 } from "firebase/auth";
-import { doc, setDoc, serverTimestamp, getDocs, collection } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, getDocs, collection, query, where } from 'firebase/firestore';
 import '../css/Auth.css';
 
 const useAuthentication = () => {
@@ -29,23 +29,29 @@ const useAuthentication = () => {
         }
     };
 
-    const signUp = async (email, password) => {
+    const signUp = async (email, password, username) => {
         setLoading(true);
         setError('');
         try {
+            const usersCollectionRef = collection(firestore, 'users');
+            const usernameQuery = query(usersCollectionRef, where("name", "==", username));
+            const usernameQuerySnapshot = await getDocs(usernameQuery);
+
+            if (!usernameQuerySnapshot.empty) {
+                setError('This username is already taken. Please choose another one.');
+                setLoading(false);
+                return;
+            }
+
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             if (userCredential && userCredential.user) {
                 const user = userCredential.user;
                 const userRef = doc(firestore, 'users', user.uid);
 
-                const usersCollectionRef = collection(firestore, 'users');
-                const querySnapshot = await getDocs(usersCollectionRef);
-                const userCount = querySnapshot.size;
-
                 await setDoc(userRef, {
                     email: user.email,
                     createdAt: serverTimestamp(),
-                    name: `User ${userCount + 1}`,
+                    name: username,
                     avatar: '/images/Default PFP.jpg'
                 });
             }
@@ -72,14 +78,28 @@ const useAuthentication = () => {
 const AuthForm = ({ isSignUp, onSubmit, error, loading }) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
+    const [username, setUsername] = useState('');
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        onSubmit(email, password);
+        if (isSignUp) {
+            onSubmit(email, password, username);
+        } else {
+            onSubmit(email, password);
+        }
     };
 
     return (
         <form onSubmit={handleSubmit}>
+            {isSignUp && (
+                <input
+                    type="text"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Username"
+                    required
+                />
+            )}
             <input 
                 type="email" 
                 value={email} 
@@ -106,9 +126,9 @@ function Auth() {
     const [isSignUp, setIsSignUp] = useState(false);
     const { signUp, signIn, error, loading } = useAuthentication();
 
-    const handleFormSubmit = (email, password) => {
+    const handleFormSubmit = (email, password, username) => {
         if (isSignUp) {
-            signUp(email, password);
+            signUp(email, password, username);
         } else {
             signIn(email, password);
         }
@@ -132,8 +152,7 @@ function Auth() {
                 <button 
                     onClick={() => setIsSignUp(!isSignUp)} 
                     className="toggle-auth-mode"
-                    disabled={loading}
-                >
+                    disabled={loading}>
                     {isSignUp ? 'Already have an account? Sign In' : "Don't have an account? Sign Up"}
                 </button>
             </div>
