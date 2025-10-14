@@ -21,6 +21,10 @@ const Nav = () => {
                 <span className="nav-icon">➕</span>
                 <span className="nav-text">Add</span>
             </NavLink>
+            <NavLink to="/app/profile" className="nav-item">
+                <span className="nav-icon">👤</span>
+                <span className="nav-text">Profile</span>
+            </NavLink>
         </nav>
     );
 };
