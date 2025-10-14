@@ -21,6 +21,7 @@ Bonfire is a modern social messaging application designed for real-time communic
       - `useAuth.js`: A hook for managing user authentication state.
       - `useFriends.js`: A hook for fetching and managing the user's friends list.
       - `useFriendRequests.js`: A hook for managing friend requests.
+      - `useChat.js`: A hook for managing chat messages and user profiles.
   - `css/`: Contains all CSS stylesheets.
     - `Home.css`: Styles for the landing page.
     - `Auth.css`: Styles for the authentication forms.
@@ -38,6 +39,8 @@ Bonfire is a modern social messaging application designed for real-time communic
 - **Friend Request System**: Users can send, receive, accept, and decline friend requests.
 - **Friend Management**: Users can view their friends list.
 - **Modern Design**: A clean, visually appealing interface that is consistent across the application.
+- **Intelligent Scrolling**: The chat automatically scrolls to the latest message only when the user is already near the bottom of the conversation.
+- **Dynamic Chat Header**: The chat header now displays the name of the friend in private chats.
 
 ## Routing
 

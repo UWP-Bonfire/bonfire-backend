@@ -4,19 +4,19 @@ import { useAuth } from './hooks/useAuth';
 import useChat from './hooks/useChat';
 import '../css/chat.css';
 
-// Message component
-const Message = ({ message, isSent }) => (
+const Message = ({ message, isSent, userProfile }) => (
     <div className={`message ${isSent ? 'sent' : 'received'}`}>
         <div className="message-bubble">
             <div className="message-info">
-                <span className="display-name">{message.displayName}</span>
+                <span className="display-name">
+                    {userProfile ? userProfile.name : (message.displayName || 'Anonymous')}
+                </span>
             </div>
             <p>{message.text}</p>
         </div>
     </div>
 );
 
-// MessageInput component
 const MessageInput = ({ onSendMessage }) => {
     const [newMessage, setNewMessage] = useState('');
 
@@ -44,7 +44,7 @@ function Chat() {
     const location = useLocation();
     const queryParams = new URLSearchParams(location.search);
     const friendId = queryParams.get('friendId');
-    const { messages, loading, sendMessage } = useChat(friendId);
+    const { messages, loading, sendMessage, userProfiles } = useChat(friendId);
     const messagesEndRef = useRef(null);
 
     const scrollToBottom = () => {
@@ -55,18 +55,23 @@ function Chat() {
         scrollToBottom();
     }, [messages]);
 
-    if (loading) {
+    if (loading && messages.length === 0) {
         return <div>Loading messages...</div>;
     }
 
     return (
         <div className="chat-container">
             <div className="chat-header">
-                <h2>{friendId ? 'Chat with friend' : 'Global Chat Room'}</h2>
+                <h2>{friendId ? `Chat with ${userProfiles[friendId]?.name || '...'}` : 'Global Chat Room'}</h2>
             </div>
             <div className="chat-messages">
                 {messages.map((message) => (
-                    <Message key={message.id} message={message} isSent={message.uid === user.uid} />
+                    <Message
+                        key={message.id}
+                        message={message}
+                        isSent={message.uid === user.uid}
+                        userProfile={userProfiles[message.uid]}
+                    />
                 ))}
                 <div ref={messagesEndRef} />
             </div>

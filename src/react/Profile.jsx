@@ -3,14 +3,14 @@ import { useAuth } from './hooks/useAuth';
 import '../css/Profile.css';
 
 function Profile() {
-    const { user } = useAuth();
+    const { user, userProfile } = useAuth();
 
     return (
         <div className="profile-container">
-            {user ? (
+            {user && userProfile ? (
                 <div className="profile-card">
-                    <img src={user.photoURL || '/images/Default PFP.jpg'} alt="Profile" className="profile-avatar" />
-                    <h2 className="profile-name">{user.displayName || 'Anonymous'}</h2>
+                    <img src={userProfile.avatar || '/images/Default PFP.jpg'} alt="Profile" className="profile-avatar" />
+                    <h2 className="profile-name">{userProfile.name || 'Anonymous'}</h2>
                     <p className="profile-email">{user.email}</p>
                 </div>
             ) : (
