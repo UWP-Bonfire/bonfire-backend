@@ -60,7 +60,7 @@ function AddFriend() {
     };
 
     return (
-        <div className="add-friend-container">
+        <div className="add-friend-container no-scrollbar">
             <div className="add-friend-card">
                 <button onClick={handleGoBack} className="back-button">
                     &larr; Back to Friends
