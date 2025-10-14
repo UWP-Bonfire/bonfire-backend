@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useAuth } from './useAuth';
 import { firestore } from '../../firebase';
 import {
@@ -17,16 +17,24 @@ const useChat = (friendId) => {
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [userProfiles, setUserProfiles] = useState({});
+    const profilesRef = useRef({});
+
+    // Keep the ref in sync with the state to avoid dependency loop
+    useEffect(() => {
+        profilesRef.current = userProfiles;
+    }, [userProfiles]);
 
     const getChatId = (uid1, uid2) => {
         return [uid1, uid2].sort().join('_');
     };
 
     const fetchUserProfiles = useCallback(async (uids) => {
-        const uidsToFetch = uids.filter(uid => !userProfiles[uid]);
+        // Use the ref to get current profiles, breaking the dependency cycle
+        const uidsToFetch = uids.filter(uid => !profilesRef.current[uid]);
         if (uidsToFetch.length === 0) return;
 
         const newUserProfiles = {};
+        // Firestore 'in' queries are limited to 30 elements
         const chunks = [];
         for (let i = 0; i < uidsToFetch.length; i += 30) {
             chunks.push(uidsToFetch.slice(i, i + 30));
@@ -41,7 +49,7 @@ const useChat = (friendId) => {
         }
 
         setUserProfiles(prevProfiles => ({ ...prevProfiles, ...newUserProfiles }));
-    }, [userProfiles]);
+    }, []); // Empty dependency array makes this function stable
 
     useEffect(() => {
         if (!user) {
@@ -58,8 +66,11 @@ const useChat = (friendId) => {
             const messagesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             setMessages(messagesData);
 
-            const uids = [...new Set(messagesData.map(msg => msg.uid))];
-            fetchUserProfiles(uids);
+            // Get all unique sender IDs from the messages
+            const uids = [...new Set(messagesData.map(msg => msg.senderId).filter(Boolean))];
+            if (uids.length > 0) {
+                fetchUserProfiles(uids);
+            }
 
             setLoading(false);
         }, (err) => {
@@ -81,7 +92,7 @@ const useChat = (friendId) => {
             await addDoc(messagesRef, {
                 text,
                 timestamp: serverTimestamp(),
-                uid: user.uid,
+                senderId: user.uid, // Persisting with senderId
                 displayName: userProfile.name || 'Anonymous',
                 photoURL: userProfile.avatar,
             });

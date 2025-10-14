@@ -39,7 +39,7 @@ Bonfire is a modern social messaging application designed for real-time communic
 - **Friend Request System**: Users can send, receive, accept, and decline friend requests.
 - **Friend Management**: Users can view their friends list.
 - **Modern Design**: A clean, visually appealing interface that is consistent across the application.
-- **Intelligent Scrolling**: The chat automatically scrolls to the latest message only when the user is already near the bottom of the conversation.
+- **Intelligent Scrolling**: The chat automatically scrolls to the latest message upon entering a chat
 - **Dynamic Chat Header**: The chat header now displays the name of the friend in private chats.
 
 ## Routing
