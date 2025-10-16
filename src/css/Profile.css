@@ -25,9 +25,38 @@
 .profile-name {
     font-size: 1.5rem;
     margin-bottom: 0.5rem;
-    color: #000000
+    color: #000000;
 }
 
 .profile-email {
     color: #555;
+}
+
+.icon-selection {
+    margin-top: 2rem;
+}
+
+.icons-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.icon-option {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.3s;
+}
+
+.icon-option.selected {
+    border-color: #007bff;
+}
+
+.icon-option:hover {
+    border-color: #0056b3;
 }
