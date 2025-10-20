@@ -19,11 +19,11 @@ const useAuthentication = () => {
                 return 'Please enter a valid email address.';
             case 'auth/user-not-found':
             case 'auth/wrong-password':
-                return 'Invalid credentials. Please try again.';
+                return 'Invalid password. Please try again.';
             case 'auth/email-already-in-use':
                 return 'An account with this email already exists.';
-            case 'auth/weak-password':
-                return 'Password should be at least 6 characters long.';
+            case 'auth/password-does-not-meet-requirements':
+                return 'Password should contain 8-34 characters, a lower and uppercase character, a number, and a special character.';
             default:
                 return 'An unexpected error occurred. Please try again.';
         }
@@ -52,7 +52,7 @@ const useAuthentication = () => {
                     email: user.email,
                     createdAt: serverTimestamp(),
                     name: username,
-                    avatar: '/images/Default PFP.jpg'
+                    avatar: '/images/icon1.png'
                 });
             }
         } catch (error) {
