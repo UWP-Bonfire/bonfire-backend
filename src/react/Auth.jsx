@@ -52,7 +52,7 @@ const useAuthentication = () => {
                     email: user.email,
                     createdAt: serverTimestamp(),
                     name: username,
-                    avatar: '/images/icon1.png'
+                    avatar: '/images/Logo.png'
                 });
             }
         } catch (error) {
