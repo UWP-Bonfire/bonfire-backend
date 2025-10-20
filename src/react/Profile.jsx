@@ -17,7 +17,7 @@ function Profile() {
         }
     }, [userProfile]);
 
-    const icons = Array.from({ length: 10 }, (_, i) => `/images/icon${i + 1}.png`);
+    const icons = Array.from({ length: 15 }, (_, i) => `/images/icon${i + 1}.png`);
 
     const handleIconSelect = async (icon) => {
         if (user) {
