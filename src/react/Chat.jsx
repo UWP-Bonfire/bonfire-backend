@@ -69,7 +69,7 @@ function Chat() {
                     <Message
                         key={message.id}
                         message={message}
-                        isSent={message.uid === user.uid}
+                        isSent={message.senderId === user.uid}
                         userProfile={userProfiles[message.uid]}
                     />
                 ))}
