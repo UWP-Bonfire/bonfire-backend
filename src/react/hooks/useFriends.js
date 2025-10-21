@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { collection, onSnapshot } from 'firebase/firestore';
+import { collection, onSnapshot, doc, query, where, documentId } from 'firebase/firestore';
 import { firestore, auth } from '../../firebase';
 
 const useFriends = () => {
@@ -9,20 +9,42 @@ const useFriends = () => {
 
     useEffect(() => {
         let unsubscribeFromFriends;
-
         const unsubscribeFromAuth = auth.onAuthStateChanged(user => {
             if (user) {
-                const usersCollection = collection(firestore, 'users');
-                unsubscribeFromFriends = onSnapshot(usersCollection, (snapshot) => {
-                    const users = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                    const otherUsers = users.filter(u => u.id !== user.uid);
-                    setFriends(otherUsers);
-                    setLoading(false);
+                const userDocRef = doc(firestore, 'users', user.uid);
+                const unsubscribeFromUser = onSnapshot(userDocRef, (userDoc) => {
+                    if (unsubscribeFromFriends) {
+                        unsubscribeFromFriends();
+                    }
+                    if (userDoc.exists()) {
+                        const userData = userDoc.data();
+                        const friendUids = userData.friends || [];
+
+                        if (friendUids.length > 0) {
+                            const usersCollection = collection(firestore, 'users');
+                            const friendsQuery = query(usersCollection, where(documentId(), 'in', friendUids));
+                            unsubscribeFromFriends = onSnapshot(friendsQuery, (snapshot) => {
+                                const friendsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                                setFriends(friendsData);
+                                setLoading(false);
+                            }, (err) => {
+                                console.error(err);
+                                setError("Couldn't fetch friends.");
+                                setLoading(false);
+                            });
+                        } else {
+                            setFriends([]);
+                            setLoading(false);
+                        }
+                    } else {
+                        setLoading(false);
+                    }
                 }, (err) => {
                     console.error(err);
-                    setError("Couldn't fetch friends.");
+                    setError("Couldn't fetch user data.");
                     setLoading(false);
                 });
+                return () => unsubscribeFromUser();
             } else {
                 if (unsubscribeFromFriends) {
                     unsubscribeFromFriends();

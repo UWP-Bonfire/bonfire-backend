@@ -23,7 +23,7 @@ const useAuthentication = () => {
             case 'auth/email-already-in-use':
                 return 'An account with this email already exists.';
             case 'auth/password-does-not-meet-requirements':
-                return 'Password should contain 8-34 characters, a lower and uppercase character, a number, and a special character.';
+                return 'Password should contain 8-36 characters, a lower and uppercase character, a number, and a special character.';
             default:
                 return 'An unexpected error occurred. Please try again.';
         }

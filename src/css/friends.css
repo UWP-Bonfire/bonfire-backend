@@ -1,92 +1,208 @@
+body {
+  margin: 0;
+  font-family: "Jeju Hallasan", sans-serif;
+  background: #fff;
+}
+
+.container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Sidebar (Direct Messages Only) */
+.sidebar {
+  width: 220px;
+  background: rgba(167, 101, 84, 0.9);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px;
+  color: #ffd9ba;
+  flex-shrink: 0;
+}
+
+.sidebar h2 {
+  text-align: center;
+  margin: 0 0 15px;
+  font-size: 20px;
+}
+
+.dm-list {
+  flex: 1;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.dm {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+  width: 100%;
+  padding: 4px 8px;
+  border-radius: 10px;
+}
+
+.dm:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.dm img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+}
+
+.dm span {
+  font-size: 16px;
+  color: #fff;
+}
+
+/* Bottom Section (Settings + User) */
+.bottom-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  margin-top: auto;
+}
+
+.settings-btn {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: #ffd9ba;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.settings-btn:hover {
+  background: #7a5c4a;
+}
+
+.settings-btn img {
+  width: 24px;
+  height: 24px;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+  background: #d9d9d9;
+  border-radius: 20px;
+  padding: 8px 12px;
+  color: #000;
+}
+
+.user img {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+}
+
+/* Main Content Area */
 .main {
-    padding: 20px;
-    background-color: #f0f2f5;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  overflow: hidden;
+  background: linear-gradient(
+    180deg,
+    rgba(231, 197, 134, 0.93) 5%,
+    #db976a 48%,
+    rgba(200, 72, 72, 0.67) 89%
+  );
 }
 
+/* Main Header */
 .main-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    color: #000;
-}
-
-.logo {
-    height: 40px;
-}
-
-.add-friend, .sign-out-btn {
-    padding: 10px 15px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #83884e;
+  border-radius: 9px;
+  padding: 12px 20px;
+  color: #ffd9ba;
 }
 
 .add-friend {
-    background-color: #4CAF50;
-    color: white;
+  padding: 8px 12px;
+  border: none;
+  border-radius: 10px;
+  background: #f2b48e;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  transition: background 0.2s;
 }
 
-.sign-out-btn {
-    background-color: #f44336;
-    color: white;
+.add-friend:hover {
+  background: #e09c74;
 }
 
-.friends-content {
-    display: grid;
-    grid-template-columns: 1fr 2fr;
-    gap: 20px;
-}
-
-.friends-list-container {
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    color: #000;
-}
-
+/* Friends List */
 .friends-container {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 15px;
+  flex: 1;
+  margin-top: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .friend-card {
-    background-color: #f9f9f9;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    padding: 10px;
-    text-align: center;
-    color: #000;
+  background-color: #d3d3d3;
+  border-radius: 8px;
+  padding: 15px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: transform 0.15s ease-in-out;
+}
+
+.friend-card:hover {
+  transform: translateY(-2px);
 }
 
 .friend-card img {
-    width: 60px;
-    height: 60px;
-    border-radius: 50%;
-    margin-bottom: 10px;
+  width: 85px;
+  height: 85px;
+  border-radius: 50%;
 }
 
-.chat-btn, .options-btn {
-    margin-top: 10px;
-    padding: 5px 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+.friend-card span {
+  flex: 1;
+  font-size: 22px;
+  color: #333;
+  margin-left: 10px;
 }
 
-.chat-btn {
-    background-color: #2196F3;
-    color: white;
+/* Buttons on friend cards */
+.chat-btn,
+.options-btn {
+  border: none;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  cursor: pointer;
+  background: #fff;
+  margin-left: 6px;
+  font-size: 20px;
+  transition: background 0.2s;
 }
 
-.no-friends-message {
-    text-align: center;
-    padding: 20px;
-    color: #000;
-}
-
-.error-message {
-    color: #f44336;
-    text-align: center;
+.chat-btn:hover,
+.options-btn:hover {
+  background: #ccc;
 }
