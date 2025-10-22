@@ -10,10 +10,13 @@ function Profile() {
     const [newUsername, setNewUsername] = useState('');
     const [usernameError, setUsernameError] = useState('');
     const [isEditingUsername, setIsEditingUsername] = useState(false);
+    const [aboutMe, setAboutMe] = useState('');
+    const [isEditingAboutMe, setIsEditingAboutMe] = useState(false);
 
     useEffect(() => {
         if (userProfile) {
             setNewUsername(userProfile.name || '');
+            setAboutMe(userProfile.aboutMe || '');
         }
     }, [userProfile]);
 
@@ -56,6 +59,22 @@ function Profile() {
         }
     };
 
+    const handleAboutMeChange = (e) => {
+        if (e.target.value.length <= 150) {
+            setAboutMe(e.target.value);
+        }
+    };
+
+    const handleAboutMeSave = async () => {
+        if (user) {
+            const userRef = doc(firestore, 'users', user.uid);
+            await updateDoc(userRef, {
+                aboutMe: aboutMe
+            });
+            setIsEditingAboutMe(false);
+        }
+    };
+
     return (
         <div className="profile-container">
             {user && userProfile ? (
@@ -80,6 +99,24 @@ function Profile() {
                         )}
                     </div>
                     <p className="profile-email">{user.email}</p>
+                    <div className="about-me-section">
+                        {isEditingAboutMe ? (
+                            <div className="edit-about-me">
+                                <textarea
+                                    value={aboutMe}
+                                    onChange={handleAboutMeChange}
+                                    className="about-me-textarea"
+                                    maxLength="150"
+                                />
+                                <div className="char-counter">{aboutMe.length}/150</div>
+                                <button onClick={handleAboutMeSave} className="save-button">Save</button>
+                            </div>
+                        ) : (
+                            <p className="profile-about-me" onClick={() => setIsEditingAboutMe(true)}>
+                                {aboutMe || 'Add an "about me"'} &#x270E;
+                            </p>
+                        )}
+                    </div>
                     <div className="icon-selection">
                         <h3>Select a Profile Picture</h3>
                         <div className="icons-grid">
