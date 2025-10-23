@@ -1,79 +1,8 @@
 
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { auth, firestore } from '../firebase';
-import { 
-    createUserWithEmailAndPassword, 
-    signInWithEmailAndPassword 
-} from "firebase/auth";
-import { doc, setDoc, serverTimestamp, getDocs, collection, query, where } from 'firebase/firestore';
+import { useAuthentication } from './hooks/useAuth';
 import '../css/Auth.css';
-
-const useAuthentication = () => {
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-
-    const getFriendlyErrorMessage = (errorCode) => {
-        switch (errorCode) {
-            case 'auth/invalid-email':
-                return 'Please enter a valid email address.';
-            case 'auth/user-not-found':
-            case 'auth/wrong-password':
-                return 'Invalid password. Please try again.';
-            case 'auth/email-already-in-use':
-                return 'An account with this email already exists.';
-            case 'auth/password-does-not-meet-requirements':
-                return 'Password should contain 8-36 characters, a lower and uppercase character, a number, and a special character.';
-            default:
-                return 'An unexpected error occurred. Please try again.';
-        }
-    };
-
-    const signUp = async (email, password, username) => {
-        setLoading(true);
-        setError('');
-        try {
-            const usersCollectionRef = collection(firestore, 'users');
-            const usernameQuery = query(usersCollectionRef, where("name", "==", username));
-            const usernameQuerySnapshot = await getDocs(usernameQuery);
-
-            if (!usernameQuerySnapshot.empty) {
-                setError('This username is already taken. Please choose another one.');
-                setLoading(false);
-                return;
-            }
-
-            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            if (userCredential && userCredential.user) {
-                const user = userCredential.user;
-                const userRef = doc(firestore, 'users', user.uid);
-
-                await setDoc(userRef, {
-                    email: user.email,
-                    createdAt: serverTimestamp(),
-                    name: username,
-                    avatar: '/images/Logo.png'
-                });
-            }
-        } catch (error) {
-            setError(getFriendlyErrorMessage(error.code));
-        }
-        setLoading(false);
-    };
-
-    const signIn = async (email, password) => {
-        setLoading(true);
-        setError('');
-        try {
-            await signInWithEmailAndPassword(auth, email, password);
-        } catch (error) {
-            setError(getFriendlyErrorMessage(error.code));
-        }
-        setLoading(false);
-    };
-
-    return { signUp, signIn, error, loading };
-};
 
 const AuthForm = ({ isSignUp, onSubmit, error, loading }) => {
     const [email, setEmail] = useState('');
@@ -122,7 +51,7 @@ const AuthForm = ({ isSignUp, onSubmit, error, loading }) => {
     );
 };
 
-function Auth() {
+function Login() {
     const [isSignUp, setIsSignUp] = useState(false);
     const { signUp, signIn, error, loading } = useAuthentication();
 
@@ -160,4 +89,4 @@ function Auth() {
     );
 }
 
-export default Auth;
+export default Login;

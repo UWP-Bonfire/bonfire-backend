@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import Auth from './Auth';
+import Login from './Login';
 import Home from './Home';
 import Chat from './Chat';
 import Friends from './Friends';
@@ -8,6 +8,13 @@ import AddFriend from './AddFriend';
 import Profile from './Profile';
 import Layout from './Layout';
 import { useAuth } from './hooks/useAuth';
+
+const ProtectedRoute = ({ user, children }) => {
+    if (!user) {
+        return <Navigate to="/auth" replace />;
+    }
+    return children;
+};
 
 const App = () => {
     const { user, loading } = useAuth();
@@ -18,7 +25,7 @@ const App = () => {
 
     return (
         <Routes>
-            <Route path="/auth" element={user ? <Navigate to="/app" /> : <Auth />} />
+            <Route path="/auth" element={user ? <Navigate to="/app" /> : <Login />} />
             <Route path="/" element={<Home />} />
             <Route 
                 path="/app"
@@ -36,13 +43,6 @@ const App = () => {
             </Route>
         </Routes>
     );
-};
-
-const ProtectedRoute = ({ user, children }) => {
-    if (!user) {
-        return <Navigate to="/auth" replace />;
-    }
-    return children;
 };
 
 export default App;

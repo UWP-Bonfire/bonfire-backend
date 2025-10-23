@@ -6,6 +6,14 @@ This document outlines the features and implementation details of the current ap
 
 ## Features Implemented
 
+### Authentication
+
+- **Refactored Authentication Logic:**
+  - The authentication logic has been extracted from the `Auth.jsx` component and moved into a reusable custom hook, `useAuthentication`, located in `src/react/hooks/useAuth.js`.
+  - A new `Login.jsx` component has been created to handle the user interface for both sign-up and sign-in, utilizing the `useAuthentication` hook.
+  - The `useAuth` hook in `src/react/hooks/useAuth.js` is used to manage the user's authentication state throughout the application.
+  - The main `App.jsx` file now uses the `Login.jsx` component for the `/auth` route.
+
 ### Profile Customization
 
 - **Profile Picture Selection:**
