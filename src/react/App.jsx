@@ -2,7 +2,8 @@ import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './Login';
 import Home from './Home';
-import Chat from './Chat';
+import Chat from './Chat'; //Keep me just in case
+import Messages from './Messages';
 import Friends from './Friends';
 import AddFriend from './AddFriend';
 import Profile from './Profile';
@@ -36,10 +37,11 @@ const App = () => {
                 }
             >
                 <Route index element={<Friends />} />
-                <Route path="chat" element={<Chat />} />
+                <Route path="chat" element={<Messages />} />
                 <Route path="add-friend" element={<AddFriend />} />
                 <Route path="friends" element={<Friends />} />
                 <Route path="profile" element={<Profile />} />
+                <Route path="messages" element={<Messages />} />
             </Route>
         </Routes>
     );

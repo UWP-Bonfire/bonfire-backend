@@ -1,68 +1,46 @@
 import { useState, useEffect } from 'react';
-import { collection, onSnapshot, doc, query, where, documentId } from 'firebase/firestore';
-import { firestore, auth } from '../../firebase';
+import { firestore } from '../../firebase';
+import { collection, doc, getDoc, getDocs, query, where, documentId } from 'firebase/firestore';
+import { useAuth } from './useAuth';
 
 const useFriends = () => {
+    const { user } = useAuth();
     const [friends, setFriends] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState(null);
 
     useEffect(() => {
-        let unsubscribeFromFriends;
-        const unsubscribeFromAuth = auth.onAuthStateChanged(user => {
-            if (user) {
-                const userDocRef = doc(firestore, 'users', user.uid);
-                const unsubscribeFromUser = onSnapshot(userDocRef, (userDoc) => {
-                    if (unsubscribeFromFriends) {
-                        unsubscribeFromFriends();
-                    }
-                    if (userDoc.exists()) {
-                        const userData = userDoc.data();
-                        const friendUids = userData.friends || [];
+        const fetchFriends = async () => {
+            if (!user) {
+                setLoading(false);
+                return;
+            }
 
-                        if (friendUids.length > 0) {
-                            const usersCollection = collection(firestore, 'users');
-                            const friendsQuery = query(usersCollection, where(documentId(), 'in', friendUids));
-                            unsubscribeFromFriends = onSnapshot(friendsQuery, (snapshot) => {
-                                const friendsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                                setFriends(friendsData);
-                                setLoading(false);
-                            }, (err) => {
-                                console.error(err);
-                                setError("Couldn't fetch friends.");
-                                setLoading(false);
-                            });
-                        } else {
-                            setFriends([]);
-                            setLoading(false);
-                        }
+            try {
+                const userDocRef = doc(firestore, 'users', user.uid);
+                const userDocSnap = await getDoc(userDocRef);
+
+                if (userDocSnap.exists()) {
+                    const friendIds = userDocSnap.data().friends;
+                    if (friendIds && friendIds.length > 0) {
+                        const friendsQuery = query(collection(firestore, 'users'), where(documentId(), 'in', friendIds));
+                        const querySnapshot = await getDocs(friendsQuery);
+                        const friendsData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                        setFriends(friendsData);
                     } else {
-                        setLoading(false);
+                        setFriends([]);
                     }
-                }, (err) => {
-                    console.error(err);
-                    setError("Couldn't fetch user data.");
-                    setLoading(false);
-                });
-                return () => unsubscribeFromUser();
-            } else {
-                if (unsubscribeFromFriends) {
-                    unsubscribeFromFriends();
                 }
-                setFriends([]);
+            } catch (error) {
+                console.error("Error fetching friends: ", error);
+            } finally {
                 setLoading(false);
             }
-        });
-
-        return () => {
-            unsubscribeFromAuth();
-            if (unsubscribeFromFriends) {
-                unsubscribeFromFriends();
-            }
         };
-    }, []);
 
-    return { friends, loading, error };
+        fetchFriends();
+    }, [user]);
+
+    return { friends, loading };
 };
 
 export default useFriends;
