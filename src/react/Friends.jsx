@@ -5,10 +5,12 @@ import useFriends from './hooks/useFriends';
 import { auth } from '../firebase';
 import { signOut } from "firebase/auth";
 import FriendRequests from './FriendRequests';
+import { useAuth } from './hooks/useAuth';
 
 export default function Friends() {
   const navigate = useNavigate();
   const { friends, loading, error } = useFriends();
+  const { user, userProfile } = useAuth();
 
   const handleChatClick = (friendId) => {
     navigate(`/app/chat?friendId=${friendId}`);
@@ -57,10 +59,12 @@ export default function Friends() {
           <div className="settings-btn" onClick={() => navigate("/settings")}>
             <img src="src/assets/Settings.svg" alt="Settings" />
           </div>
-          <div className="user" onClick={() => navigate("/app/profile")}>
-            <img src="/icons/User.svg" alt="User" />
-            <span>User123</span>
-          </div>
+          {user && userProfile && (
+            <div className="user" onClick={() => navigate("/app/profile")}>
+              <img src={userProfile.avatar || '/images/Default PFP.jpg'} alt="User" />
+              <span>{user.displayName}</span>
+            </div>
+          )}
         </div>
       </div>
 
