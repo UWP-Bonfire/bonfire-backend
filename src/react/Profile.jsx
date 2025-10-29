@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { firestore } from '../firebase';
 import { doc, updateDoc, collection, getDocs, query, where } from 'firebase/firestore';
@@ -12,6 +13,11 @@ function Profile() {
     const [isEditingUsername, setIsEditingUsername] = useState(false);
     const [aboutMe, setAboutMe] = useState('');
     const [isEditingAboutMe, setIsEditingAboutMe] = useState(false);
+    const navigate = useNavigate();
+
+    const handleGoBack = () => {
+        navigate('/app/friends');
+    };
 
     useEffect(() => {
         if (userProfile) {
@@ -79,6 +85,9 @@ function Profile() {
         <div className="profile-container">
             {user && userProfile ? (
                 <div className="profile-card">
+                    <button onClick={handleGoBack} className="back-button">
+                        &larr; Back to Friends
+                    </button>
                     <img src={selectedIcon || userProfile.avatar || '/images/Default PFP.jpg'} alt="Profile" className="profile-avatar" />
                     <div className="username-section">
                         {isEditingUsername ? (
