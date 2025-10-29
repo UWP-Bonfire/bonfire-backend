@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { firestore } from '../../firebase';
+import { firestore } from '../firebase';
 import { collection, query, where, getDocs, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from './hooks/useAuth';
 import '../css/add-friend.css';
@@ -32,7 +32,7 @@ function AddFriend() {
 
         try {
             const usersRef = collection(firestore, 'users');
-            const q = query(usersRef, where('name', '>=', trimmedQuery), where('name', '<=', trimmedQuery + '\uf8ff'));
+            const q = query(usersRef, where('name', '==', trimmedQuery));
             const querySnapshot = await getDocs(q);
 
             const users = querySnapshot.docs
@@ -41,7 +41,7 @@ function AddFriend() {
 
             setSearchResults(users);
             if (users.length === 0) {
-                setMessage('No users found.');
+                setMessage('No users found with that exact username.');
             }
         } catch (err) {
             console.error('Error searching for users:', err);
@@ -49,11 +49,12 @@ function AddFriend() {
         }
     };
 
-    const handleSendRequest = async (recipientId) => {
+    const handleSendRequest = async (recipient) => {
         setMessage('');
         setError('');
 
         try {
+            const recipientId = recipient.id;
             const requestId = `${currentUser.uid}_${recipientId}`;
             const requestRef = doc(firestore, 'friendRequests', requestId);
 
@@ -64,7 +65,7 @@ function AddFriend() {
                 createdAt: serverTimestamp(),
             });
 
-            setMessage(`Friend request sent successfully!`);
+            setMessage(`Friend request sent successfully to ${recipient.name}!`);
         } catch (err) {
             console.error('Error sending friend request:', err);
             setError('Failed to send friend request.');
@@ -97,7 +98,7 @@ function AddFriend() {
                     {searchResults.map(user => (
                         <div key={user.id} className="search-result-item">
                             <span>{user.name}</span>
-                            <button onClick={() => handleSendRequest(user.id)} className="add-friend-button">Send Request</button>
+                            <button onClick={() => handleSendRequest(user)} className="add-friend-button">Send Request</button>
                         </div>
                     ))}
                 </div>

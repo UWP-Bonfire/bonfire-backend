@@ -137,7 +137,7 @@
 .message-bubble {
   display: flex;
   flex-direction: column;
-  background: #f0f4f7;
+  background: #ffe5dc;
   border-radius: 18px;
   padding: 10px 15px;
   position: relative;
@@ -161,6 +161,7 @@
 }
 
 .message-text {
+  color: #000000;
   font-size: 15px;
   line-height: 1.4;
   word-wrap: break-word;
