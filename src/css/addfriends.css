@@ -1,0 +1,120 @@
+.addfriends-container {
+   background: linear-gradient(
+    180deg,
+    rgba(231, 197, 134, 0.93) 5%,
+    #db976a 48%,
+    rgba(200, 72, 72, 0.67) 89%
+  );
+  min-height: 100vh;
+  padding: 50px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: "Poppins", sans-serif;
+  color: #3c2b23;
+}
+
+.page-title {
+  color: #fff;
+  font-size: 2.2rem;
+  margin-bottom: 30px;
+  text-align: center;
+}
+
+.search-bar {
+  width: 80%;
+  max-width: 600px;
+  margin-bottom: 30px;
+}
+
+.search-bar input {
+  width: 100%;
+  padding: 12px 15px;
+  border-radius: 10px;
+  border: none;
+  font-size: 1rem;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+}
+
+.friends-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 80%;
+  max-width: 600px;
+}
+
+.friend-card {
+  background-color: #fff8f3;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  border-radius: 12px;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+  transition: transform 0.2s ease;
+}
+
+.friend-card:hover {
+  transform: scale(1.02);
+}
+
+.friend-avatar {
+  width: 55px;
+  height: 55px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #c84848;
+}
+
+.friend-name {
+  flex-grow: 1;
+  margin-left: 15px;
+  font-weight: 600;
+  color: #3c2b23;
+}
+
+.add-btn {
+  background-color: #c84848;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.add-btn:hover {
+  background-color: #a93636;
+}
+
+.added-btn {
+  background-color: #5a3d31;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px 14px;
+}
+
+.no-results {
+  color: #fff;
+  font-size: 1.1rem;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.back-btn {
+  margin-top: 40px;
+  background-color: #3c2b23;
+  color: #fff;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 10px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.back-btn:hover {
+  background-color: #5a3d31;
+}

@@ -8,7 +8,10 @@
   overflow: hidden;
 }
 
+
+
 /*Sidebar */
+
 .sidebar {
   width: 220px;
   background: #a76554;
@@ -31,48 +34,19 @@
   display: flex;
   flex-direction: column;
   gap: 25px;
-  width: 100%;
+}
+
+.sidebar-icons img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  cursor: pointer;
+  transition: background 0.3s;
 }
 
 .sidebar-icons img:hover {
   background: #7a5c4a;
 }
-
-.dm-list {
-  width: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.dm {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 8px 10px;
-  border-radius: 8px;
-  transition: background 0.3s;
-  cursor: pointer;
-}
-
-.dm:hover,
-.dm.active {
-  background: #7a5c4a;
-}
-
-.dm img {
-  width: 45px;
-  height: 45px;
-  object-fit: cover;
-  border-radius: 50%;
-}
-
-.dm span {
-  color: #000;
-  font-weight: 500;
-  font-size: 15px;
-}
-
 
 .create-group {
   background: #f4b991;
@@ -192,10 +166,6 @@
   word-wrap: break-word;
 }
 
-.message-row.received .message-text {
-  color: #000;
-}
-
 
 .input-box {
   background: #4e280c; /* Full brown bar */
@@ -273,35 +243,39 @@
   display: none;
 }
 
-/* Sidebar Header */
-.sidebar-header {
+.chat-header {
   display: flex;
   align-items: center;
-  justify-content: center; 
-  gap: 10px;
-  width: 100%;
-  margin-bottom: 20px;
+  justify-content: space-between;
+  background: #4e280c;
+  color: #ffd9ba;
+  padding: 10px 20px;
+  font-size: 20px;
+  border-radius: 6px;
+  margin-bottom: 10px;
 }
-
-/* Back arrow inside sidebar */
 .back-btn {
-  background: none;
   border: none;
-  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.2s;
-}
-
-.back-btn img {
-  width: 26px;
-  height: 26px;
-  align-items: left;
-  transform: rotate(180deg); /* makes arrow point left */
-  filter: brightness(1.1);
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transition: background 0.2s ease, transform 0.2s ease;
 }
 
 .back-btn:hover {
-  transform: scale(1.1);
+  background: #5a3d31;
+  transform: scale(1.05);
 }
+
+.back-btn img {
+  width: 14px;
+  height: 14px;
+  filter: brightness(1.2);
+  transform: rotate(180deg);
+}
+

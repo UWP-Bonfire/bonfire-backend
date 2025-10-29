@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { firestore } from '../firebase';
-import { doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { firestore } from '../../firebase';
+import { collection, query, where, getDocs, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from './hooks/useAuth';
 import '../css/add-friend.css';
 
 function AddFriend() {
     const { user: currentUser } = useAuth();
-    const [recipientId, setRecipientId] = useState('');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchResults, setSearchResults] = useState([]);
     const [message, setMessage] = useState('');
     const [error, setError] = useState('');
     const navigate = useNavigate();
@@ -16,46 +17,57 @@ function AddFriend() {
         navigate('/app/friends');
     };
 
-    const handleSendRequest = async (e) => {
+    const handleSearch = async (e) => {
         e.preventDefault();
         setMessage('');
         setError('');
+        setSearchResults([]);
 
-        const trimmedId = recipientId.trim();
+        const trimmedQuery = searchQuery.trim();
 
-        if (!trimmedId) {
-            setError('Please enter a user ID.');
-            return;
-        }
-
-        if (trimmedId === currentUser.uid) {
-            setError('You cannot send a friend request to yourself.');
+        if (!trimmedQuery) {
+            setError('Please enter a username to search.');
             return;
         }
 
         try {
-            const userRef = doc(firestore, 'users', trimmedId);
-            const userSnapshot = await getDoc(userRef);
-            if (!userSnapshot.exists()) {
-                setError('A user with this ID does not exist.');
-                return;
-            }
+            const usersRef = collection(firestore, 'users');
+            const q = query(usersRef, where('name', '>=', trimmedQuery), where('name', '<=', trimmedQuery + '\uf8ff'));
+            const querySnapshot = await getDocs(q);
 
-            const requestId = `${currentUser.uid}_${trimmedId}`;
+            const users = querySnapshot.docs
+                .map(doc => ({ id: doc.id, ...doc.data() }))
+                .filter(user => user.id !== currentUser.uid);
+
+            setSearchResults(users);
+            if (users.length === 0) {
+                setMessage('No users found.');
+            }
+        } catch (err) {
+            console.error('Error searching for users:', err);
+            setError('Failed to search for users.');
+        }
+    };
+
+    const handleSendRequest = async (recipientId) => {
+        setMessage('');
+        setError('');
+
+        try {
+            const requestId = `${currentUser.uid}_${recipientId}`;
             const requestRef = doc(firestore, 'friendRequests', requestId);
 
             await setDoc(requestRef, {
                 from: currentUser.uid,
-                to: trimmedId,
+                to: recipientId,
                 status: 'pending',
                 createdAt: serverTimestamp(),
             });
 
-            setMessage('Friend request sent successfully!');
-            setRecipientId('');
+            setMessage(`Friend request sent successfully!`);
         } catch (err) {
             console.error('Error sending friend request:', err);
-            setError('Failed to send friend request. Please check the user ID and try again.');
+            setError('Failed to send friend request.');
         }
     };
 
@@ -66,20 +78,29 @@ function AddFriend() {
                     &larr; Back to Friends
                 </button>
                 <h2>Connect with Others</h2>
-                <p>Enter the user ID of the person you want to connect with. You can find your user ID in your profile.</p>
-                <form onSubmit={handleSendRequest} className="add-friend-form">
+                <p>Search for users by their username and send them a friend request.</p>
+                <form onSubmit={handleSearch} className="add-friend-form">
                     <input
                         type="text"
-                        value={recipientId}
-                        onChange={(e) => setRecipientId(e.target.value)}
-                        placeholder="Enter a User ID"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Enter a username"
                         className="add-friend-input"
-                        aria-label="Friend's User ID"
+                        aria-label="Username search"
                     />
-                    <button type="submit" className="add-friend-button">Send Friend Request</button>
+                    <button type="submit" className="add-friend-button">Search</button>
                 </form>
                 {message && <p className="success-message">{message}</p>}
                 {error && <p className="error-message">{error}</p>}
+
+                <div className="search-results">
+                    {searchResults.map(user => (
+                        <div key={user.id} className="search-result-item">
+                            <span>{user.name}</span>
+                            <button onClick={() => handleSendRequest(user.id)} className="add-friend-button">Send Request</button>
+                        </div>
+                    ))}
+                </div>
             </div>
         </div>
     );

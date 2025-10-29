@@ -4,6 +4,7 @@ body {
   background: #fff;
 }
 
+
 .container {
   display: flex;
   height: 100vh;
@@ -156,6 +157,7 @@ body {
   flex: 1;
   margin-top: 20px;
   overflow-y: auto;
+  align-items: center;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -164,7 +166,8 @@ body {
 .friend-card {
   background-color: #d3d3d3;
   border-radius: 8px;
-  padding: 15px 20px;
+  width: 95%;
+  padding: 50px 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -202,7 +205,9 @@ body {
   transition: background 0.2s;
 }
 
+
 .chat-btn:hover,
 .options-btn:hover {
   background: #ccc;
 }
+
