@@ -1,10 +1,10 @@
-
 import { useState, useEffect } from 'react';
 import { auth, firestore } from '../../firebase';
 import {
     onAuthStateChanged,
     createUserWithEmailAndPassword,
-    signInWithEmailAndPassword
+    signInWithEmailAndPassword,
+    updateProfile
 } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp, getDocs, collection, query, where } from 'firebase/firestore';
 
@@ -74,12 +74,14 @@ const useAuthentication = () => {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             if (userCredential && userCredential.user) {
                 const user = userCredential.user;
+                await updateProfile(user, { displayName: username });
                 const userRef = doc(firestore, 'users', user.uid);
 
                 await setDoc(userRef, {
                     email: user.email,
                     createdAt: serverTimestamp(),
                     name: username,
+                    displayName: username,
                     avatar: '/images/Logo.png'
                 });
             }

@@ -279,3 +279,55 @@
   transform: rotate(180deg);
 }
 
+.dm-list {
+  width: 100%;
+  overflow-y: auto;
+  flex-grow: 1;
+}
+
+.dm {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  cursor: pointer;
+  transition: background 0.2s;
+  border-radius: 8px;
+  margin-bottom: 5px;
+}
+
+.dm:hover {
+  background: #7a5c4a;
+}
+
+.dm img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.dm span {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.user {
+  display: flex;
+  align-items: center;
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid #7a5c4a;
+  width: 100%;
+}
+
+.user img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 10px;
+}
+
+.user span {
+  font-size: 14px;
+  font-weight: 500;
+}

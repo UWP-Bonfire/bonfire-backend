@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import Login from './Login';
+import SignUp from './SignUp';
 import Home from './Home';
 import Chat from './Chat'; //Keep me just in case
 import Messages from './Messages';
@@ -27,6 +28,7 @@ const App = () => {
     return (
         <Routes>
             <Route path="/auth" element={user ? <Navigate to="/app" /> : <Login />} />
+            <Route path="/signup" element={user ? <Navigate to="/app" /> : <SignUp />} />
             <Route path="/" element={<Home />} />
             <Route 
                 path="/app"

@@ -44,15 +44,6 @@ body {
     cursor: pointer;
   }
 
-  .sidebar {
-    width: 240px;
-    background: #fafafa;
-    border-right: 1px solid #e0e0e0;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-  }
-
   .main {
     flex: 1;
     padding: 20px;

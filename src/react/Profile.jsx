@@ -2,15 +2,15 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import { firestore } from '../firebase';
-import { doc, updateDoc, collection, getDocs, query, where } from 'firebase/firestore';
+import { doc, updateDoc } from 'firebase/firestore';
+import { getAuth, updateProfile } from 'firebase/auth';
 import '../css/Profile.css';
 
 function Profile() {
     const { user, userProfile } = useAuth();
     const [selectedIcon, setSelectedIcon] = useState(null);
-    const [newUsername, setNewUsername] = useState('');
-    const [usernameError, setUsernameError] = useState('');
-    const [isEditingUsername, setIsEditingUsername] = useState(false);
+    const [newDisplayName, setNewDisplayName] = useState('');
+    const [isEditingDisplayName, setIsEditingDisplayName] = useState(false);
     const [aboutMe, setAboutMe] = useState('');
     const [isEditingAboutMe, setIsEditingAboutMe] = useState(false);
     const navigate = useNavigate();
@@ -20,11 +20,13 @@ function Profile() {
     };
 
     useEffect(() => {
+        if (user) {
+            setNewDisplayName(user.displayName || '');
+        }
         if (userProfile) {
-            setNewUsername(userProfile.name || '');
             setAboutMe(userProfile.aboutMe || '');
         }
-    }, [userProfile]);
+    }, [user, userProfile]);
 
     const icons = Array.from({ length: 15 }, (_, i) => `/images/icon${i + 1}.png`);
 
@@ -38,30 +40,23 @@ function Profile() {
         }
     };
 
-    const handleUsernameChange = (e) => {
-        setNewUsername(e.target.value);
-        setUsernameError('');
+    const handleDisplayNameChange = (e) => {
+        setNewDisplayName(e.target.value);
     };
 
-    const checkUsernameUniqueness = async (username) => {
-        const usersRef = collection(firestore, 'users');
-        const q = query(usersRef, where('name', '==', username));
-        const querySnapshot = await getDocs(q);
-        return querySnapshot.empty;
-    };
+    const handleDisplayNameSave = async () => {
+        if (user && newDisplayName.trim() !== '') {
+            const auth = getAuth();
+            await updateProfile(auth.currentUser, {
+                displayName: newDisplayName
+            });
 
-    const handleUsernameSave = async () => {
-        if (user && newUsername.trim() !== '') {
-            const isUnique = await checkUsernameUniqueness(newUsername);
-            if (isUnique) {
-                const userRef = doc(firestore, 'users', user.uid);
-                await updateDoc(userRef, {
-                    name: newUsername
-                });
-                setIsEditingUsername(false);
-            } else {
-                setUsernameError('Username is already taken.');
-            }
+            const userRef = doc(firestore, 'users', user.uid);
+            await updateDoc(userRef, {
+                displayName: newDisplayName
+            });
+
+            setIsEditingDisplayName(false);
         }
     };
 
@@ -90,21 +85,23 @@ function Profile() {
                     </button>
                     <img src={selectedIcon || userProfile.avatar || '/images/Default PFP.jpg'} alt="Profile" className="profile-avatar" />
                     <div className="username-section">
-                        {isEditingUsername ? (
+                        {isEditingDisplayName ? (
                             <div className="edit-username">
                                 <input
                                     type="text"
-                                    value={newUsername}
-                                    onChange={handleUsernameChange}
+                                    value={newDisplayName}
+                                    onChange={handleDisplayNameChange}
                                     className="username-input"
                                 />
-                                <button onClick={handleUsernameSave} className="save-button">Save</button>
-                                {usernameError && <p className="error-message">{usernameError}</p>}
+                                <button onClick={handleDisplayNameSave} className="save-button">Save</button>
                             </div>
                         ) : (
-                            <h2 className="profile-name" onClick={() => setIsEditingUsername(true)}>
-                                {userProfile.name || 'Anonymous'} &#x270E;
-                            </h2>
+                            <div onClick={() => setIsEditingDisplayName(true)} style={{cursor: 'pointer'}}>
+                                <h2 className="profile-display-name">
+                                    {user.displayName || 'Anonymous'} &#x270E;
+                                </h2>
+                                <p className="profile-username">@{userProfile.name}</p>
+                            </div>
                         )}
                     </div>
                     <p className="profile-email">{user.email}</p>
