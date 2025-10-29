@@ -4,10 +4,11 @@ import {
     onAuthStateChanged,
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
-    updateProfile
+    updateProfile,
+    sendEmailVerification,
+    signOut
 } from "firebase/auth";
 import { doc, setDoc, getDoc, serverTimestamp, getDocs, collection, query, where } from 'firebase/firestore';
-
 
 const useAuth = () => {
     const [user, setUser] = useState(null);
@@ -16,12 +17,26 @@ const useAuth = () => {
 
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user) {
+            if (user && user.emailVerified) {
                 const userRef = doc(firestore, 'users', user.uid);
                 const docSnap = await getDoc(userRef);
+                
+                let profileData;
                 if (docSnap.exists()) {
-                    setUserProfile(docSnap.data());
+                    profileData = docSnap.data();
+                } else {
+                    const newProfile = {
+                        email: user.email,
+                        createdAt: serverTimestamp(),
+                        name: user.displayName, // Username stored during sign-up
+                        displayName: user.displayName,
+                        avatar: '/images/Logo.png'
+                    };
+                    await setDoc(userRef, newProfile);
+                    const newDocSnap = await getDoc(userRef);
+                    profileData = newDocSnap.data();
                 }
+                setUserProfile(profileData);
                 setUser(user);
             } else {
                 setUser(null);
@@ -36,10 +51,10 @@ const useAuth = () => {
     return { user, userProfile, loading };
 };
 
-
 const useAuthentication = () => {
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [verificationSent, setVerificationSent] = useState(false);
 
     const getFriendlyErrorMessage = (errorCode) => {
         switch (errorCode) {
@@ -47,11 +62,13 @@ const useAuthentication = () => {
                 return 'Please enter a valid email address.';
             case 'auth/user-not-found':
             case 'auth/wrong-password':
-                return 'Invalid password. Please try again.';
+                return 'Invalid email or password. Please try again.';
             case 'auth/email-already-in-use':
                 return 'An account with this email already exists.';
             case 'auth/password-does-not-meet-requirements':
                 return 'Password should contain 8-36 characters, a lower and uppercase character, a number, and a special character.';
+            case 'auth/email-not-verified':
+                return 'Please verify your email before logging in. A new verification email has been sent.';
             default:
                 return 'An unexpected error occurred. Please try again.';
         }
@@ -60,6 +77,7 @@ const useAuthentication = () => {
     const signUp = async (email, password, username) => {
         setLoading(true);
         setError('');
+        setVerificationSent(false);
         try {
             const usersCollectionRef = collection(firestore, 'users');
             const usernameQuery = query(usersCollectionRef, where("name", "==", username));
@@ -75,15 +93,11 @@ const useAuthentication = () => {
             if (userCredential && userCredential.user) {
                 const user = userCredential.user;
                 await updateProfile(user, { displayName: username });
-                const userRef = doc(firestore, 'users', user.uid);
+                await sendEmailVerification(user);
+                await signOut(auth);
 
-                await setDoc(userRef, {
-                    email: user.email,
-                    createdAt: serverTimestamp(),
-                    name: username,
-                    displayName: username,
-                    avatar: '/images/Logo.png'
-                });
+                setVerificationSent(true);
+                setError('A verification email has been sent. Please check your inbox and verify your account before logging in.');
             }
         } catch (error) {
             setError(getFriendlyErrorMessage(error.code));
@@ -95,14 +109,23 @@ const useAuthentication = () => {
         setLoading(true);
         setError('');
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            if (!userCredential.user.emailVerified) {
+                await sendEmailVerification(userCredential.user);
+                await signOut(auth);
+                setError(getFriendlyErrorMessage('auth/email-not-verified'));
+            }
         } catch (error) {
-            setError(getFriendlyErrorMessage(error.code));
+            if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found') {
+                 setError('Invalid email or password. Please try again.');
+            } else {
+                 setError(getFriendlyErrorMessage(error.code));
+            }
         }
         setLoading(false);
     };
 
-    return { signUp, signIn, error, loading };
+    return { signUp, signIn, error, loading, verificationSent };
 };
 
 export { useAuth, useAuthentication };
