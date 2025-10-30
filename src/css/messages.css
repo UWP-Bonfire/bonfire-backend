@@ -56,8 +56,15 @@
   padding: 10px;
   cursor: pointer;
   font-size: 14px;
-  margin-top: auto; /* forces it to bottom */
   transition: background 0.3s;
+}
+
+.sidebar-bottom-buttons {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
 }
 
 

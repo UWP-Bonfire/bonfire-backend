@@ -64,8 +64,9 @@ const useChat = (friendId) => {
         setMessages([]);
         setLoading(true);
 
-        const chatId = getChatId(user.uid, friendId);
-        const messagesPath = `chats/${chatId}/messages`;
+        const isGlobalChat = friendId === 'global';
+        const messagesPath = isGlobalChat ? 'messages' : `chats/${getChatId(user.uid, friendId)}/messages`;
+
         const messagesRef = collection(firestore, messagesPath);
         const q = query(messagesRef, orderBy("timestamp"));
 
@@ -91,8 +92,9 @@ const useChat = (friendId) => {
     const sendMessage = useCallback(async (text) => {
         if (text.trim() === "" || !user || !userProfile || !friendId) return;
 
-        const chatId = getChatId(user.uid, friendId);
-        const messagesPath = `chats/${chatId}/messages`;
+        const isGlobalChat = friendId === 'global';
+        const messagesPath = isGlobalChat ? 'messages' : `chats/${getChatId(user.uid, friendId)}/messages`;
+        
         const messagesRef = collection(firestore, messagesPath);
 
         try {
@@ -110,7 +112,8 @@ const useChat = (friendId) => {
     }, [user, userProfile, friendId]);
 
     const markMessageAsRead = useCallback(async (messageId) => {
-        if (!user || !friendId) return;
+        if (!user || !friendId || friendId === 'global') return;
+        
         const chatId = getChatId(user.uid, friendId);
         const messagesPath = `chats/${chatId}/messages`;
         const messageRef = doc(firestore, messagesPath, messageId);

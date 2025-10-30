@@ -85,7 +85,7 @@ export default function Messages() {
     useEffect(() => {
       scrollToBottom();
     }, [messages]);
-  
+
     return (
       <>
         <div className="chat-header">
@@ -147,7 +147,12 @@ export default function Messages() {
             )}
           </div>
         </div>
-        <button className="create-group">+ Create Group Chat</button>
+        <div className="sidebar-bottom-buttons">
+            <button className="create-group" onClick={() => handleFriendClick({ id: 'global', name: 'Global Chat', avatar: '/images/icon11.png' })}>
+            Global Chat Room
+            </button>
+            <button className="create-group">+ Create Group Chat</button>
+        </div>
       </aside>
       <main className="chat-area">
         {selectedFriend ? (
