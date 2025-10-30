@@ -31,28 +31,93 @@ const MessageInput = ({ onSendMessage }) => {
     );
 };
 
+const MessageRow = ({ message, user, userProfiles, onRead, isLast }) => {
+    const isSent = message.senderId === user.uid;
+
+    useEffect(() => {
+        if (!isSent && !message.read) {
+            onRead(message.id);
+        }
+    }, [isSent, message.read, message.id, onRead]);
+
+    return (
+        <div className={`message-row ${isSent ? "sent" : "received"}`}>
+            <img
+                src={userProfiles[message.senderId]?.avatar || '/images/default-avatar.png'}
+                alt={userProfiles[message.senderId]?.name || 'Anonymous'}
+                className="msg-avatar"
+            />
+            <div className="message-bubble">
+                <span className="msg-name">{userProfiles[message.senderId]?.name || 'Anonymous'}</span>
+                <div className="message-text">{message.text}</div>
+                {isSent && isLast && (
+                    <div className={`read-receipt ${message.read ? 'read' : 'unread'}`}>
+                        {message.read ? '✓✓' : '✓'}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+};
+
 export default function Messages() {
   const navigate = useNavigate();
   const { user } = useAuth();
   const { friends, loading: friendsLoading } = useFriends();
   const [selectedFriend, setSelectedFriend] = useState(null);
-  const { messages, loading: messagesLoading, sendMessage, userProfiles } = useChat(selectedFriend ? selectedFriend.id : null);
-  const messagesEndRef = useRef(null);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
+  
   const handleBack = () => {
     navigate("/app");
   };
 
   const handleFriendClick = (friend) => {
     setSelectedFriend(friend);
+  };
+
+  const ChatView = ({ friend }) => {
+    const { messages, loading: messagesLoading, sendMessage, userProfiles, markMessageAsRead } = useChat(friend.id);
+    const messagesEndRef = useRef(null);
+  
+    const scrollToBottom = () => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+  
+    useEffect(() => {
+      scrollToBottom();
+    }, [messages]);
+  
+    return (
+      <>
+        <div className="chat-header">
+          <img
+            src={friend.avatar || '/images/default-avatar.png'}
+            alt={friend.name}
+            className="chat-header-avatar"
+          />
+          <span>Chat with {friend.name}</span>
+        </div>
+        <div className="chat-body">
+          {messagesLoading && messages.length === 0 ? (
+            <div className="loading-messages">Loading messages...</div>
+          ) : (
+            messages.map((message, index) => (
+              <MessageRow
+                key={message.id}
+                message={message}
+                user={user}
+                userProfiles={userProfiles}
+                onRead={markMessageAsRead}
+                isLast={index === messages.length - 1}
+              />
+            ))
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+        <div className="input-box">
+          <MessageInput onSendMessage={sendMessage} />
+        </div>
+      </>
+    );
   };
 
   return (
@@ -86,41 +151,7 @@ export default function Messages() {
       </aside>
       <main className="chat-area">
         {selectedFriend ? (
-          <>
-            <div className="chat-header">
-              <img
-                src={selectedFriend.avatar || '/images/default-avatar.png'}
-                alt={selectedFriend.name}
-                className="chat-header-avatar"
-              />
-              <span>Chat with {selectedFriend.name}</span>
-            </div>
-            <div className="chat-body">
-              {messagesLoading && messages.length === 0 ? (
-                <div className="loading-messages">Loading messages...</div>
-              ) : (
-                messages.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`message-row ${message.senderId === user.uid ? "sent" : "received"}`}>
-                     <img
-                       src={userProfiles[message.senderId]?.avatar || '/images/default-avatar.png'}
-                       alt={userProfiles[message.senderId]?.name || 'Anonymous'}
-                       className="msg-avatar"
-                     />
-                     <div className="message-bubble">
-                       <span className="msg-name">{userProfiles[message.senderId]?.name || 'Anonymous'}</span>
-                       <div className="message-text">{message.text}</div>
-                     </div>
-                  </div>
-                ))
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-            <div className="input-box">
-              <MessageInput onSendMessage={sendMessage} />
-            </div>
-          </>
+          <ChatView key={selectedFriend.id} friend={selectedFriend} />
         ) : (
           <div className="no-chat-selected">
             <h2>Select a friend to start a conversation</h2>

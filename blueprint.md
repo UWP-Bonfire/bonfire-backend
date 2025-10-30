@@ -25,3 +25,11 @@ This document outlines the features and implementation details of the current ap
   - Users can change their username.
   - The application ensures that the new username is unique across all users.
   - The UI provides an intuitive in-place editing experience.
+
+## Current Task: Implement Read Receipts
+
+- **Data Structure:** Add a `read` field to each message in Firestore.
+- **Message Logic:**
+    - When a message is sent, the `read` field will be set to `false`.
+    - When a message is read by the recipient, the `read` field will be updated to `true`.
+- **UI:** Display a visual indicator for read and unread messages.
