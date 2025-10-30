@@ -31,7 +31,7 @@ const MessageInput = ({ onSendMessage }) => {
     );
 };
 
-const MessageRow = ({ message, user, userProfiles, onRead, isLast }) => {
+const MessageRow = ({ message, user, userProfiles, onRead, isLast, isGlobalChat }) => {
     const isSent = message.senderId === user.uid;
 
     useEffect(() => {
@@ -50,7 +50,7 @@ const MessageRow = ({ message, user, userProfiles, onRead, isLast }) => {
             <div className="message-bubble">
                 <span className="msg-name">{userProfiles[message.senderId]?.name || 'Anonymous'}</span>
                 <div className="message-text">{message.text}</div>
-                {isSent && isLast && (
+                {!isGlobalChat && isSent && isLast && (
                     <div className={`read-receipt ${message.read ? 'read' : 'unread'}`}>
                         {message.read ? '✓✓' : '✓'}
                     </div>
@@ -74,7 +74,7 @@ export default function Messages() {
     setSelectedFriend(friend);
   };
 
-  const ChatView = ({ friend }) => {
+  const ChatView = ({ friend, isGlobalChat }) => {
     const { messages, loading: messagesLoading, sendMessage, userProfiles, markMessageAsRead } = useChat(friend.id);
     const messagesEndRef = useRef(null);
   
@@ -108,6 +108,7 @@ export default function Messages() {
                 userProfiles={userProfiles}
                 onRead={markMessageAsRead}
                 isLast={index === messages.length - 1}
+                isGlobalChat={isGlobalChat}
               />
             ))
           )}
@@ -156,7 +157,7 @@ export default function Messages() {
       </aside>
       <main className="chat-area">
         {selectedFriend ? (
-          <ChatView key={selectedFriend.id} friend={selectedFriend} />
+          <ChatView key={selectedFriend.id} friend={selectedFriend} isGlobalChat={selectedFriend.id === 'global'} />
         ) : (
           <div className="no-chat-selected">
             <h2>Select a friend to start a conversation</h2>
