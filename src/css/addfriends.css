@@ -113,6 +113,11 @@
   font-size: 1rem;
   cursor: pointer;
   transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+  width: fit-content;
 }
 
 .back-btn:hover {

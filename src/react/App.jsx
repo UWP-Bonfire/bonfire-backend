@@ -6,7 +6,7 @@ import Home from './Home';
 import Chat from './Chat'; //Keep me just in case
 import Messages from './Messages';
 import Friends from './Friends';
-import AddFriend from './AddFriend';
+import AddFriends from './AddFriends';
 import Profile from './Profile';
 import Layout from './Layout';
 import { useAuth } from './hooks/useAuth';
@@ -40,7 +40,7 @@ const App = () => {
             >
                 <Route index element={<Friends />} />
                 <Route path="chat" element={<Messages />} />
-                <Route path="add-friend" element={<AddFriend />} />
+                <Route path="add-friend" element={<AddFriends />} />
                 <Route path="friends" element={<Friends />} />
                 <Route path="profile" element={<Profile />} />
                 <Route path="messages" element={<Messages />} />

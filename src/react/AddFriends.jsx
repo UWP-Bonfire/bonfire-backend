@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import { firestore } from '../firebase';
 import { collection, query, where, getDocs, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useAuth } from './hooks/useAuth';
-import '../css/add-friend.css';
+import '../css/addfriends.css';
 
-function AddFriend() {
+function AddFriends() {
     const { user: currentUser } = useAuth();
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
@@ -73,38 +73,37 @@ function AddFriend() {
     };
 
     return (
-        <div className="add-friend-container no-scrollbar">
-            <div className="add-friend-card">
-                <button onClick={handleGoBack} className="back-button">
-                    &larr; Back to Friends
-                </button>
-                <h2>Connect with Others</h2>
-                <p>Search for users by their username and send them a friend request.</p>
-                <form onSubmit={handleSearch} className="add-friend-form">
+        <div className="addfriends-container">
+            <h1 className="page-title">Connect with Others</h1>
+            <div className="search-bar">
+                <form onSubmit={handleSearch}>
                     <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Enter a username"
-                        className="add-friend-input"
                         aria-label="Username search"
                     />
-                    <button type="submit" className="add-friend-button">Search</button>
                 </form>
-                {message && <p className="success-message">{message}</p>}
-                {error && <p className="error-message">{error}</p>}
-
-                <div className="search-results">
-                    {searchResults.map(user => (
-                        <div key={user.id} className="search-result-item">
-                            <span>{user.name}</span>
-                            <button onClick={() => handleSendRequest(user)} className="add-friend-button">Send Request</button>
-                        </div>
-                    ))}
-                </div>
             </div>
+            {message && <p className="no-results">{message}</p>}
+            {error && <p className="no-results">{error}</p>}
+
+            <div className="friends-list">
+                {searchResults.map(user => (
+                    <div key={user.id} className="friend-card">
+                        <img src={user.avatar || '/images/default-avatar.png'} alt={user.name} className="friend-avatar" />
+                        <span className="friend-name">{user.name}</span>
+                        <button onClick={() => handleSendRequest(user)} className="add-btn">Send Request</button>
+                    </div>
+                ))}
+            </div>
+            <button onClick={handleGoBack} className="back-btn">
+                <span>&larr;</span>
+                <span>Back to Friends</span>
+            </button>
         </div>
     );
 }
 
-export default AddFriend;
+export default AddFriends;
