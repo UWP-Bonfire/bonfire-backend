@@ -60,7 +60,7 @@ export default function Friends() {
             <img src="src/assets/Settings.svg" alt="Settings" />
           </div>
           {user && userProfile && (
-            <div className="user" onClick={() => navigate("/app/profile")}>
+            <div className="user" onClick={() => navigate("/app/account")}>
               <img src={userProfile.avatar || '/images/Default PFP.jpg'} alt="User" />
               <span>{user.displayName}</span>
             </div>

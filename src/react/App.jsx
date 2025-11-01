@@ -7,9 +7,11 @@ import Chat from './Chat'; //Keep me just in case
 import Messages from './Messages';
 import Friends from './Friends';
 import AddFriends from './AddFriends';
-import Profile from './Profile';
+import Account from './Account';
 import Layout from './Layout';
 import { useAuth } from './hooks/useAuth';
+import Personalization from './Personalization';
+
 
 const ProtectedRoute = ({ user, children }) => {
     if (!user) {
@@ -42,8 +44,9 @@ const App = () => {
                 <Route path="chat" element={<Messages />} />
                 <Route path="add-friend" element={<AddFriends />} />
                 <Route path="friends" element={<Friends />} />
-                <Route path="profile" element={<Profile />} />
+                <Route path="account" element={<Account />} />
                 <Route path="messages" element={<Messages />} />
+                <Route path="personalization" element={<Personalization />} />
             </Route>
         </Routes>
     );

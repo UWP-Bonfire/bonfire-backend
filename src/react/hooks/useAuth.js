@@ -8,7 +8,7 @@ import {
     sendEmailVerification,
     signOut
 } from "firebase/auth";
-import { doc, setDoc, getDoc, serverTimestamp, getDocs, collection, query, where } from 'firebase/firestore';
+import { doc, setDoc, getDoc, serverTimestamp, getDocs, collection, query, where, onSnapshot } from 'firebase/firestore';
 
 const useAuth = () => {
     const [user, setUser] = useState(null);
@@ -16,33 +16,35 @@ const useAuth = () => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user && user.emailVerified) {
                 const userRef = doc(firestore, 'users', user.uid);
-                const docSnap = await getDoc(userRef);
-                
-                let profileData;
-                if (docSnap.exists()) {
-                    profileData = docSnap.data();
-                } else {
-                    const newProfile = {
-                        email: user.email,
-                        createdAt: serverTimestamp(),
-                        name: user.displayName, // Username stored during sign-up
-                        displayName: user.displayName,
-                        avatar: '/images/Logo.png'
-                    };
-                    await setDoc(userRef, newProfile);
-                    const newDocSnap = await getDoc(userRef);
-                    profileData = newDocSnap.data();
-                }
-                setUserProfile(profileData);
-                setUser(user);
+                const unsubProfile = onSnapshot(userRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        setUserProfile(docSnap.data());
+                    } else {
+                        // Handle case where profile doesn't exist, maybe create one
+                        const newProfile = {
+                            email: user.email,
+                            createdAt: serverTimestamp(),
+                            displayName: user.displayName,
+                            avatar: '/images/Logo.png',
+                            bio: 'Welcome to Bonfire!',
+                            bgColor: '#ffd9ba',
+                            usernameColor: '#c84848'
+                        };
+                        setDoc(userRef, newProfile);
+                        setUserProfile(newProfile);
+                    }
+                    setUser(user);
+                    setLoading(false);
+                });
+                return () => unsubProfile();
             } else {
                 setUser(null);
                 setUserProfile(null);
+                setLoading(false);
             }
-            setLoading(false);
         });
 
         return () => unsubscribe();
