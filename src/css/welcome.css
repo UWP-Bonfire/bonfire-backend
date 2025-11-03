@@ -1,0 +1,68 @@
+body {
+  margin: 0;
+  font-family: "Jeju Hallasan", sans-serif;
+}
+
+.welcome-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  background: linear-gradient(
+    180deg,
+    rgba(231, 197, 134, 0.93) 5%,
+    #db976a 48%,
+    rgba(200, 72, 72, 0.67) 89%
+  );
+}
+
+.welcome-content {
+  text-align: center;
+  color: #3c2b23;
+}
+
+.welcome-logo {
+  width: 150px;
+  height: 150px;
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: 36px;
+  margin-bottom: 40px;
+}
+
+.button-group {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+}
+
+.welcome-btn {
+  padding: 12px 28px;
+  font-size: 18px;
+  font-weight: bold;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+/* Button Colors */
+.register {
+  background: #f2b48e;
+  color: #3c2b23;
+}
+
+.register:hover {
+  background: #e09c74;
+}
+
+.login {
+  background: #3c2b23;
+  color: #ffd9ba;
+}
+
+.login:hover {
+  background: #7a5c4a;
+}

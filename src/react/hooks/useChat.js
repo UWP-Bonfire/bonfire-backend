@@ -10,6 +10,8 @@ import {
     serverTimestamp,
     getDocs,
     where,
+    doc,
+    updateDoc,
 } from 'firebase/firestore';
 
 const useChat = (friendId) => {
@@ -52,13 +54,19 @@ const useChat = (friendId) => {
     }, []); // Empty dependency array makes this function stable
 
     useEffect(() => {
-        if (!user) {
+        if (!user || !friendId) {
+            setMessages([]);
             setLoading(false);
             return;
         }
 
-        const chatId = friendId ? getChatId(user.uid, friendId) : 'global';
-        const messagesPath = friendId ? `chats/${chatId}/messages` : 'messages';
+        // Reset state when friendId changes
+        setMessages([]);
+        setLoading(true);
+
+        const isGlobalChat = friendId === 'global';
+        const messagesPath = isGlobalChat ? 'messages' : `chats/${getChatId(user.uid, friendId)}/messages`;
+
         const messagesRef = collection(firestore, messagesPath);
         const q = query(messagesRef, orderBy("timestamp"));
 
@@ -81,11 +89,12 @@ const useChat = (friendId) => {
         return () => unsubscribe();
     }, [user, friendId, fetchUserProfiles]);
 
-    const sendMessage = async (text) => {
-        if (text.trim() === "" || !user || !userProfile) return;
+    const sendMessage = useCallback(async (text) => {
+        if (text.trim() === "" || !user || !userProfile || !friendId) return;
 
-        const chatId = friendId ? getChatId(user.uid, friendId) : 'global';
-        const messagesPath = friendId ? `chats/${chatId}/messages` : 'messages';
+        const isGlobalChat = friendId === 'global';
+        const messagesPath = isGlobalChat ? 'messages' : `chats/${getChatId(user.uid, friendId)}/messages`;
+        
         const messagesRef = collection(firestore, messagesPath);
 
         try {
@@ -95,13 +104,30 @@ const useChat = (friendId) => {
                 senderId: user.uid, // Persisting with senderId
                 displayName: userProfile.name || 'Anonymous',
                 photoURL: userProfile.avatar,
+                read: false, // Add read field
             });
         } catch (err) {
             console.error("Error sending message: ", err);
         }
-    };
+    }, [user, userProfile, friendId]);
 
-    return { messages, loading, sendMessage, userProfiles };
+    const markMessageAsRead = useCallback(async (messageId) => {
+        if (!user || !friendId || friendId === 'global') return;
+        
+        const chatId = getChatId(user.uid, friendId);
+        const messagesPath = `chats/${chatId}/messages`;
+        const messageRef = doc(firestore, messagesPath, messageId);
+
+        try {
+            await updateDoc(messageRef, {
+                read: true,
+            });
+        } catch (err) {
+            console.error("Error marking message as read: ", err);
+        }
+    }, [user, friendId]);
+
+    return { messages, loading, sendMessage, userProfiles, markMessageAsRead };
 };
 
 export default useChat;

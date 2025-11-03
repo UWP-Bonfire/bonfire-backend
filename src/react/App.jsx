@@ -1,13 +1,24 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import Auth from './Auth';
+import Login from './Login';
+import SignUp from './SignUp';
 import Home from './Home';
-import Chat from './Chat';
+import Chat from './Chat'; //Keep me just in case
+import Messages from './Messages';
 import Friends from './Friends';
-import AddFriend from './AddFriend';
-import Profile from './Profile';
+import AddFriends from './AddFriends';
+import Account from './Account';
 import Layout from './Layout';
 import { useAuth } from './hooks/useAuth';
+import Personalization from './Personalization';
+
+
+const ProtectedRoute = ({ user, children }) => {
+    if (!user) {
+        return <Navigate to="/auth" replace />;
+    }
+    return children;
+};
 
 const App = () => {
     const { user, loading } = useAuth();
@@ -18,7 +29,8 @@ const App = () => {
 
     return (
         <Routes>
-            <Route path="/auth" element={user ? <Navigate to="/app" /> : <Auth />} />
+            <Route path="/auth" element={user ? <Navigate to="/app" /> : <Login />} />
+            <Route path="/signup" element={user ? <Navigate to="/app" /> : <SignUp />} />
             <Route path="/" element={<Home />} />
             <Route 
                 path="/app"
@@ -29,20 +41,15 @@ const App = () => {
                 }
             >
                 <Route index element={<Friends />} />
-                <Route path="chat" element={<Chat />} />
-                <Route path="add-friend" element={<AddFriend />} />
+                <Route path="chat" element={<Messages />} />
+                <Route path="add-friend" element={<AddFriends />} />
                 <Route path="friends" element={<Friends />} />
-                <Route path="profile" element={<Profile />} />
+                <Route path="account" element={<Account />} />
+                <Route path="messages" element={<Messages />} />
+                <Route path="personalization" element={<Personalization />} />
             </Route>
         </Routes>
     );
-};
-
-const ProtectedRoute = ({ user, children }) => {
-    if (!user) {
-        return <Navigate to="/auth" replace />;
-    }
-    return children;
 };
 
 export default App;

@@ -1,24 +1,16 @@
-import React from 'react';
-import '../css/friends.css';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import "../css/friends.css";
 import useFriends from './hooks/useFriends';
 import { auth } from '../firebase';
 import { signOut } from "firebase/auth";
-import FriendRequests from './FriendRequests'; // Import FriendRequests
+import FriendRequests from './FriendRequests';
+import { useAuth } from './hooks/useAuth';
 
-// FriendCard component
-const FriendCard = ({ friend, onChatClick }) => (
-  <div className="friend-card">
-    <img src={friend.avatar || '/images/default-avatar.png'} alt={friend.name} />
-    <span>{friend.name}</span>
-    <button className="chat-btn" onClick={() => onChatClick(friend.id)}>💬</button>
-    <button className="options-btn">⚙️</button>
-  </div>
-);
-
-function Friends() {
-  const { friends, loading, error } = useFriends();
+export default function Friends() {
   const navigate = useNavigate();
+  const { friends, loading, error } = useFriends();
+  const { user, userProfile } = useAuth();
 
   const handleChatClick = (friendId) => {
     navigate(`/app/chat?friendId=${friendId}`);
@@ -45,32 +37,67 @@ function Friends() {
   }
 
   return (
-    <div className="main">
-        <div className="main-header">
-            <img src="/images/Logo.png" alt="Logo" className="logo" />
-            <h1>Friends</h1>
-            <button onClick={handleAddFriend} className="add-friend">Add Friend</button>
-            <button onClick={handleSignOut} className="sign-out-btn">Sign Out</button>
+    <div className="container">
+      {/* Sidebar (Direct Messages Only) */}
+      <div className="sidebar">
+        <h2>Direct Messages</h2>
+
+        <div className="dm-list">
+          {friends.map((friend) => (
+            <div
+              className="dm"
+              key={friend.id}
+              onClick={() => handleChatClick(friend.id)}
+            >
+              <img src={friend.avatar || '/images/default-avatar.png'} alt={friend.name} />
+              <span>{friend.name}</span>
+            </div>
+          ))}
+        </div>
+
+        <div className="bottom-section">
+          <div className="settings-btn" onClick={() => navigate("/settings")}>
+            <img src="src/assets/Settings.svg" alt="Settings" />
+          </div>
+          {user && userProfile && (
+            <div className="user" onClick={() => navigate("/app/account")}>
+              <img src={userProfile.avatar || '/images/Default PFP.jpg'} alt="User" />
+              <span>{user.displayName}</span>
+            </div>
+          )}
+        </div>
       </div>
-      <div className="friends-content">
+
+      {/* Main Area */}
+      <div className="main">
+        <div className="main-header">
+          <h1>Friends</h1>
+          <button onClick={handleAddFriend} className="add-friend">Add Friend</button>
+          <button onClick={handleSignOut} className="sign-out-btn">Sign Out</button>
+        </div>
+        
         <FriendRequests />
-        <div className="friends-list-container">
-            <h3>Your Friends</h3>
-            {friends.length === 0 ? (
+
+        <div className="friends-container">
+          {friends.length === 0 ? (
                 <div className="no-friends-message">
                     <p>You haven't added any friends yet. Use the "Add Friend" button to connect with others.</p>
                 </div>
             ) : (
-                <div className="friends-container">
-                    {friends.map(friend => (
-                        <FriendCard key={friend.id} friend={friend} onChatClick={handleChatClick} />
-                    ))}
-                </div>
-            )}
+                friends.map((friend) => (
+                    <div className="friend-card" key={friend.id}>
+                        <img src={friend.avatar || '/images/default-avatar.png'} alt={friend.name} />
+                        <span>{friend.name}</span>
+                        <button className="chat-btn" onClick={() => handleChatClick(friend.id)}>
+                        💬
+                        </button>
+                        <button className="options-btn">⋮</button>
+                    </div>
+                 ))
+            )
+          }
         </div>
       </div>
     </div>
   );
 }
-
-export default Friends;
