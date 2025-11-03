@@ -11,6 +11,7 @@ import Account from './Account';
 import Layout from './Layout';
 import { useAuth } from './hooks/useAuth';
 import Personalization from './Personalization';
+import Settings from './Settings';
 
 
 const ProtectedRoute = ({ user, children }) => {
@@ -47,6 +48,7 @@ const App = () => {
                 <Route path="account" element={<Account />} />
                 <Route path="messages" element={<Messages />} />
                 <Route path="personalization" element={<Personalization />} />
+                <Route path="settings" element={<Settings />} />
             </Route>
         </Routes>
     );
