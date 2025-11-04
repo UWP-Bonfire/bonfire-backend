@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useAuth } from './hooks/useAuth';
 import useFriends from './hooks/useFriends';
 import useNotifications from './hooks/useNotifications';
@@ -11,16 +11,19 @@ const GlobalNotificationListener = () => {
     const { friends } = useFriends();
     const { showNotification } = useNotifications();
     const { updateFavicon } = useFavicon('/images/Logo.png');
+    
+    const notifiedSendersRef = useRef(new Set());
     const [notificationCount, setNotificationCount] = useState(0);
+
 
     const getChatId = (uid1, uid2) => {
         return [uid1, uid2].sort().join('_');
     };
 
-    const resetNotificationCount = useCallback(() => {
+    const resetNotifications = useCallback(() => {
+        notifiedSendersRef.current.clear();
         setNotificationCount(0);
-        updateFavicon(0);
-    }, [updateFavicon]);
+    }, []);
 
     useEffect(() => {
         updateFavicon(notificationCount);
@@ -28,6 +31,8 @@ const GlobalNotificationListener = () => {
 
     useEffect(() => {
         if (!user || !friends) return;
+        
+        resetNotifications();
 
         const sessionStartTime = new Date();
         const currentUserId = user.uid;
@@ -43,18 +48,24 @@ const GlobalNotificationListener = () => {
                 snapshot.docChanges().forEach(change => {
                     if (change.type === 'added') {
                         const message = change.doc.data();
-                        if (message.senderId && message.senderId !== currentUserId && !change.doc.metadata.hasPendingWrites) {
-                            const senderName = chat.name;
-                            const senderAvatar = chat.avatar;
+                        const senderId = message.senderId;
 
-                            showNotification(
-                                `New message from ${senderName || 'Someone'}`,
-                                {
-                                    body: message.text,
-                                    icon: senderAvatar || '/images/Default PFP.jpg'
-                                }
-                            );
-                            setNotificationCount(prevCount => prevCount + 1);
+                        if (senderId && senderId !== currentUserId && !change.doc.metadata.hasPendingWrites) {
+                            if (!notifiedSendersRef.current.has(senderId)) {
+                                notifiedSendersRef.current.add(senderId);
+                                setNotificationCount(notifiedSendersRef.current.size);
+
+                                const senderName = chat.name;
+                                const senderAvatar = chat.avatar;
+
+                                showNotification(
+                                    `New message from ${senderName || 'Someone'}`,
+                                    {
+                                        body: message.text,
+                                        icon: senderAvatar || '/images/Default PFP.jpg'
+                                    }
+                                );
+                            }
                         }
                     }
                 });
@@ -69,14 +80,14 @@ const GlobalNotificationListener = () => {
             unsubscribes.forEach(unsub => unsub());
         };
 
-    }, [user, friends, showNotification]);
+    }, [user, friends, showNotification, resetNotifications]);
     
     useEffect(() => {
-        window.addEventListener('focus', resetNotificationCount);
+        window.addEventListener('focus', resetNotifications);
         return () => {
-            window.removeEventListener('focus', resetNotificationCount)
+            window.removeEventListener('focus', resetNotifications)
         }
-    }, [resetNotificationCount]);
+    }, [resetNotifications]);
 
 
     return null;
