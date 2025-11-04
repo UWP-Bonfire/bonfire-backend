@@ -193,7 +193,7 @@ body {
     gap: 10px;
 }
 
-.friend-info span {
+.friend-info .friend-name {
   font-size: 22px;
   color: #333;
 }
@@ -232,7 +232,7 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 12px;
+    font-size: 18px;
     font-weight: bold;
     margin-right: 10px;
 }

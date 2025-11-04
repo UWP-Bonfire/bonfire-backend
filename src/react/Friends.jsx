@@ -123,7 +123,7 @@ export default function Friends() {
                     <div className="friend-card" key={friend.id}>
                         <img src={friend.avatar || '/images/default-avatar.png'} alt={friend.name} />
                         <div className="friend-info">
-                            <span>{friend.name}</span>
+                            <span className="friend-name">{friend.name}</span>
                             {unreadCounts[friend.id] > 0 && (
                                 <span className="unread-count">{unreadCounts[friend.id]}</span>
                             )}
