@@ -40,8 +40,9 @@ const GlobalNotificationListener = () => {
                     if (change.type === 'added') {
                         const message = change.doc.data();
 
-                        // Do not show notification if the message was sent by the current user.
-                        if (message.senderId && message.senderId !== currentUserId) {
+                        // Do not show notification if the message was sent by the current user,
+                        // or if the change is from a local write that hasn't been committed yet.
+                        if (message.senderId && message.senderId !== currentUserId && !change.doc.metadata.hasPendingWrites) {
                             const senderName = chat.name;
                             const senderAvatar = chat.avatar;
 
