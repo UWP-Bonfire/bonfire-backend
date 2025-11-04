@@ -349,3 +349,12 @@
 .read-receipt.read {
     color: #4caf50;
 }
+
+.unread-count {
+    background-color: #c84848;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 12px;
+    margin-left: auto;
+}

@@ -45,7 +45,7 @@ body {
   cursor: pointer;
   transition: background 0.2s;
   width: 100%;
-  padding: 4px 8px;
+  padding: 4px 0px;
   border-radius: 10px;
 }
 
@@ -57,6 +57,7 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 50%;
+  margin-left: 5px;
 }
 
 .dm span {
@@ -99,10 +100,10 @@ body {
   align-items: center;
   gap: 10px;
   font-size: 16px;
-  background: #d9d9d9;
+  background: #7a5c4a;
   border-radius: 20px;
   padding: 8px 12px;
-  color: #000;
+  color: #fff;
 }
 
 .user img {
@@ -167,7 +168,7 @@ body {
   background-color: #d3d3d3;
   border-radius: 8px;
   width: 95%;
-  padding: 50px 20px;
+  padding: 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -182,13 +183,25 @@ body {
   width: 85px;
   height: 85px;
   border-radius: 50%;
+  margin-right: 20px;
 }
 
-.friend-card span {
-  flex: 1;
+.friend-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.friend-info span {
   font-size: 22px;
   color: #333;
-  margin-left: 10px;
+}
+
+.friend-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 /* Buttons on friend cards */
@@ -200,7 +213,6 @@ body {
   height: 42px;
   cursor: pointer;
   background: #fff;
-  margin-left: 6px;
   font-size: 20px;
   transition: background 0.2s;
 }
@@ -211,3 +223,22 @@ body {
   background: #ccc;
 }
 
+.unread-count {
+    background-color: #c84848;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.no-friends-message {
+    text-align: center;
+    margin-top: 50px;
+    color: #666;
+}

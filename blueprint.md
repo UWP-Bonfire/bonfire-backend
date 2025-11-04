@@ -26,6 +26,16 @@ This document outlines the features and implementation details of the current ap
   - The application ensures that the new username is unique across all users.
   - The UI provides an intuitive in-place editing experience.
 
+### Unread Message Count
+
+- **Functionality:** Displays a bubble with the number of unread messages next to a friend's name in both the friends list and the direct message list.
+- **Implementation:**
+    - **Real-time Updates:** Uses Firestore's `onSnapshot` to listen for changes in unread message counts for each friend.
+    - **Components:**
+        - `src/react/Friends.jsx`: Updated to fetch and display the unread count in the main friends list and the direct messages sidebar.
+        - `src/react/Messages.jsx`: Updated to fetch and display the unread count in the direct messages sidebar.
+    - **Styling:** Added a new `.unread-count` CSS class to `src/css/friends.css` and `src/css/messages.css` to style the notification bubble.
+
 ## Current Task: Implement Read Receipts
 
 - **Data Structure:** Add a `read` field to each message in Firestore.

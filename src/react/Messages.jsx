@@ -4,6 +4,9 @@ import { useAuth } from "./hooks/useAuth";
 import useChat from "./hooks/useChat";
 import useFriends from "./hooks/useFriends";
 import "../css/messages.css";
+import { firestore } from "../firebase";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
+
 
 const MessageInput = ({ onSendMessage }) => {
     const [newMessage, setNewMessage] = useState('');
@@ -65,6 +68,32 @@ export default function Messages() {
   const { user } = useAuth();
   const { friends, loading: friendsLoading } = useFriends();
   const [selectedFriend, setSelectedFriend] = useState(null);
+  const [unreadCounts, setUnreadCounts] = useState({});
+
+  useEffect(() => {
+    if (!user || friends.length === 0) {
+      return;
+    }
+
+    const unsubscribes = friends.map(friend => {
+      // Assuming a chat ID is created by sorting user UIDs
+      const chatId = [user.uid, friend.id].sort().join('_');
+      const messagesRef = collection(firestore, 'chats', chatId, 'messages');
+      const q = query(messagesRef, where('read', '==', false), where('senderId', '==', friend.id));
+
+      const unsubscribe = onSnapshot(q, snapshot => {
+        setUnreadCounts(prevCounts => ({
+          ...prevCounts,
+          [friend.id]: snapshot.size,
+        }));
+      });
+      return unsubscribe;
+    });
+
+    return () => {
+      unsubscribes.forEach(unsub => unsub());
+    };
+  }, [friends, user]);
   
   const handleBack = () => {
     navigate("/app");
@@ -143,6 +172,9 @@ export default function Messages() {
                 >
                   <img src={friend.avatar || '/images/default-avatar.png'} alt={friend.name} />
                   <span>{friend.name}</span>
+                  {unreadCounts[friend.id] > 0 && (
+                    <span className="unread-count">{unreadCounts[friend.id]}</span>
+                  )}
                 </div>
               ))
             )}
