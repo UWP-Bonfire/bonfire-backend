@@ -19,7 +19,7 @@ const GlobalNotificationListener = () => {
         if (!user || !friends) return;
 
         // Combine friends and global chat for setting up listeners
-        const allChats = [...friends, { id: 'global', name: 'Global Chat' }];
+        const allChats = [...friends];
 
         const unsubscribes = allChats.map(chat => {
             const isGlobal = chat.id === 'global';
