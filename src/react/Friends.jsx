@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import "../css/friends.css";
 import useFriends from './hooks/useFriends';
@@ -6,11 +6,17 @@ import { auth } from '../firebase';
 import { signOut } from "firebase/auth";
 import FriendRequests from './FriendRequests';
 import { useAuth } from './hooks/useAuth';
+import useNotifications from './hooks/useNotifications';
 
 export default function Friends() {
   const navigate = useNavigate();
   const { friends, loading, error } = useFriends();
   const { user, userProfile } = useAuth();
+  const { requestPermission } = useNotifications();
+
+  useEffect(() => {
+    requestPermission();
+  }, [requestPermission]);
 
   const handleChatClick = (friendId) => {
     navigate(`/app/chat?friendId=${friendId}`);

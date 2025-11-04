@@ -12,13 +12,19 @@ import Layout from './Layout';
 import { useAuth } from './hooks/useAuth';
 import Personalization from './Personalization';
 import Settings from './Settings';
+import GlobalNotificationListener from './GlobalNotificationListener';
 
 
 const ProtectedRoute = ({ user, children }) => {
     if (!user) {
         return <Navigate to="/auth" replace />;
     }
-    return children;
+    return (
+        <>
+            <GlobalNotificationListener />
+            {children}
+        </>
+    );
 };
 
 const App = () => {

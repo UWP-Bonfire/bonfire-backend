@@ -21,7 +21,6 @@ const useChat = (friendId) => {
     const [userProfiles, setUserProfiles] = useState({});
     const profilesRef = useRef({});
 
-    // Keep the ref in sync with the state to avoid dependency loop
     useEffect(() => {
         profilesRef.current = userProfiles;
     }, [userProfiles]);
@@ -31,12 +30,10 @@ const useChat = (friendId) => {
     };
 
     const fetchUserProfiles = useCallback(async (uids) => {
-        // Use the ref to get current profiles, breaking the dependency cycle
         const uidsToFetch = uids.filter(uid => !profilesRef.current[uid]);
         if (uidsToFetch.length === 0) return;
 
         const newUserProfiles = {};
-        // Firestore 'in' queries are limited to 30 elements
         const chunks = [];
         for (let i = 0; i < uidsToFetch.length; i += 30) {
             chunks.push(uidsToFetch.slice(i, i + 30));
@@ -51,7 +48,7 @@ const useChat = (friendId) => {
         }
 
         setUserProfiles(prevProfiles => ({ ...prevProfiles, ...newUserProfiles }));
-    }, []); // Empty dependency array makes this function stable
+    }, []);
 
     useEffect(() => {
         if (!user || !friendId) {
@@ -60,7 +57,6 @@ const useChat = (friendId) => {
             return;
         }
 
-        // Reset state when friendId changes
         setMessages([]);
         setLoading(true);
 
@@ -71,11 +67,10 @@ const useChat = (friendId) => {
         const q = query(messagesRef, orderBy("timestamp"));
 
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            const messagesData = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setMessages(messagesData);
+            const allMessages = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            setMessages(allMessages);
 
-            // Get all unique sender IDs from the messages
-            const uids = [...new Set(messagesData.map(msg => msg.senderId).filter(Boolean))];
+            const uids = [...new Set(allMessages.map(msg => msg.senderId).filter(Boolean))];
             if (uids.length > 0) {
                 fetchUserProfiles(uids);
             }
@@ -101,10 +96,10 @@ const useChat = (friendId) => {
             await addDoc(messagesRef, {
                 text,
                 timestamp: serverTimestamp(),
-                senderId: user.uid, // Persisting with senderId
+                senderId: user.uid,
                 displayName: userProfile.name || 'Anonymous',
                 photoURL: userProfile.avatar,
-                read: false, // Add read field
+                read: false,
             });
         } catch (err) {
             console.error("Error sending message: ", err);
