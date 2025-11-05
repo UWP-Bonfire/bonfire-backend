@@ -1,94 +1,94 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from './hooks/useAuth';
 import useFriends from './hooks/useFriends';
-import useNotifications from './hooks/useNotifications';
 import useFavicon from './hooks/useFavicon';
+import useNotifications from './hooks/useNotifications';
 import { firestore } from '../firebase';
-import { collection, query, where, onSnapshot } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
 
 const GlobalNotificationListener = () => {
     const { user } = useAuth();
     const { friends } = useFriends();
-    const { showNotification } = useNotifications();
     const { updateFavicon } = useFavicon('/images/Logo.png');
-    
-    const notifiedSendersRef = useRef(new Set());
-    const [notificationCount, setNotificationCount] = useState(0);
-
+    const { showNotification } = useNotifications();
+    const [unreadCounts, setUnreadCounts] = useState({});
 
     const getChatId = (uid1, uid2) => {
         return [uid1, uid2].sort().join('_');
     };
 
-    const resetNotifications = useCallback(() => {
-        notifiedSendersRef.current.clear();
-        setNotificationCount(0);
-    }, []);
-
+    // Effect for handling favicon count
     useEffect(() => {
-        updateFavicon(notificationCount);
-    }, [notificationCount, updateFavicon]);
+        if (!user || friends.length === 0) {
+            updateFavicon(0);
+            return;
+        }
 
-    useEffect(() => {
-        if (!user || !friends) return;
-        
-        resetNotifications();
+        const unsubscribes = friends.map(friend => {
+            const chatId = getChatId(user.uid, friend.id);
+            const messagesRef = collection(firestore, 'chats', chatId, 'messages');
+            const q = query(messagesRef, where('read', '==', false), where('senderId', '==', friend.id));
 
-        const sessionStartTime = new Date();
-        const currentUserId = user.uid;
-
-        const unsubscribes = friends.map(chat => {
-            const chatId = getChatId(currentUserId, chat.id);
-            const messagesPath = `chats/${chatId}/messages`;
-            const messagesRef = collection(firestore, messagesPath);
-
-            const q = query(messagesRef, where('timestamp', '>', sessionStartTime));
-
-            const unsubscribe = onSnapshot(q, (snapshot) => {
-                snapshot.docChanges().forEach(change => {
-                    if (change.type === 'added') {
-                        const message = change.doc.data();
-                        const senderId = message.senderId;
-
-                        if (senderId && senderId !== currentUserId && !change.doc.metadata.hasPendingWrites) {
-                            if (!notifiedSendersRef.current.has(senderId)) {
-                                notifiedSendersRef.current.add(senderId);
-                                setNotificationCount(notifiedSendersRef.current.size);
-
-                                const senderName = chat.name;
-                                const senderAvatar = chat.avatar;
-
-                                showNotification(
-                                    `New message from ${senderName || 'Someone'}`,
-                                    {
-                                        body: message.text,
-                                        icon: senderAvatar || '/images/Default PFP.jpg'
-                                    }
-                                );
-                            }
-                        }
-                    }
-                });
-            }, (error) => {
-                console.error("Error in notification listener for chat:", chatId, error);
+            const unsubscribe = onSnapshot(q, snapshot => {
+                setUnreadCounts(prevCounts => ({
+                    ...prevCounts,
+                    [friend.id]: snapshot.size,
+                }));
             });
-
             return unsubscribe;
         });
 
         return () => {
             unsubscribes.forEach(unsub => unsub());
         };
+    }, [friends, user]);
 
-    }, [user, friends, showNotification, resetNotifications]);
-    
+    // Effect for handling new message notifications
     useEffect(() => {
-        window.addEventListener('focus', resetNotifications);
-        return () => {
-            window.removeEventListener('focus', resetNotifications)
+        if (!user || friends.length === 0) {
+            return;
         }
-    }, [resetNotifications]);
 
+        const sessionStartTime = new Date();
+
+        const unsubscribes = friends.map(friend => {
+            const chatId = getChatId(user.uid, friend.id);
+            const messagesRef = collection(firestore, 'chats', chatId, 'messages');
+            const q = query(
+                messagesRef,
+                where('timestamp', '>', sessionStartTime),
+                orderBy('timestamp')
+            );
+
+            const unsubscribe = onSnapshot(q, (snapshot) => {
+                snapshot.docChanges().forEach(change => {
+                    const message = change.doc.data();
+                    if (change.type === 'added' && !change.doc.metadata.hasPendingWrites && message.senderId === friend.id) {
+                        showNotification(
+                            `New message from ${friend.name || 'Someone'}`,
+                            {
+                                body: message.text,
+                                icon: friend.avatar || '/images/Default PFP.jpg'
+                            }
+                        );
+                    }
+                });
+            }, (error) => {
+                console.error(`Error in notification listener for chat with ${friend.name}:`, error);
+            });
+            return unsubscribe;
+        });
+
+        return () => {
+            unsubscribes.forEach(unsub => unsub());
+        };
+    }, [user, friends, showNotification]);
+
+    // Effect to update the favicon
+    useEffect(() => {
+        const totalUnread = Object.values(unreadCounts).reduce((sum, count) => sum + count, 0);
+        updateFavicon(totalUnread);
+    }, [unreadCounts, updateFavicon]);
 
     return null;
 };

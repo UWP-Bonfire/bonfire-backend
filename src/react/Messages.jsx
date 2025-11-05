@@ -34,14 +34,8 @@ const MessageInput = ({ onSendMessage }) => {
     );
 };
 
-const MessageRow = ({ message, user, userProfiles, onRead, isLast, isGlobalChat }) => {
+const MessageRow = ({ message, user, userProfiles, isLast, isGlobalChat }) => {
     const isSent = message.senderId === user.uid;
-
-    useEffect(() => {
-        if (!isSent && !message.read) {
-            onRead(message.id);
-        }
-    }, [isSent, message.read, message.id, onRead]);
 
     return (
         <div className={`message-row ${isSent ? "sent" : "received"}`}>
@@ -112,8 +106,15 @@ export default function Messages() {
     };
   
     useEffect(() => {
-      scrollToBottom();
-    }, [messages]);
+        scrollToBottom();
+        if (messages.length > 0) {
+            messages.forEach(message => {
+                if (message.senderId !== user.uid && !message.read) {
+                    markMessageAsRead(message.id);
+                }
+            });
+        }
+    }, [messages, user.uid, markMessageAsRead]);
 
     return (
       <>
@@ -135,7 +136,6 @@ export default function Messages() {
                 message={message}
                 user={user}
                 userProfiles={userProfiles}
-                onRead={markMessageAsRead}
                 isLast={index === messages.length - 1}
                 isGlobalChat={isGlobalChat}
               />
