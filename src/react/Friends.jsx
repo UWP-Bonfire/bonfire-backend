@@ -8,6 +8,7 @@ import FriendRequests from './FriendRequests';
 import { useAuth } from './hooks/useAuth';
 import useNotifications from './hooks/useNotifications';
 import { collection, query, where, onSnapshot } from "firebase/firestore";
+import useFriendRequests from "./hooks/useFriendRequests";
 
 export default function Friends() {
   const navigate = useNavigate();
@@ -16,10 +17,37 @@ export default function Friends() {
   const { requestPermission } = useNotifications();
   const [unreadCounts, setUnreadCounts] = useState({});
   const [showPopup, setShowPopup] = useState(false);
+  const { requests: friendRequests } = useFriendRequests();
+  const [notifications, setNotifications] = useState([]);
 
   useEffect(() => {
     requestPermission();
   }, [requestPermission]);
+
+  useEffect(() => {
+    if (!user) return;
+
+    const unreadMessages = Object.entries(unreadCounts)
+        .filter(([, count]) => count > 0)
+        .map(([friendId]) => {
+            const friend = friends.find(f => f.id === friendId);
+            return {
+                id: `msg-${friendId}`,
+                type: 'message',
+                title: `New message from ${friend?.name}`,
+                avatar: friend?.avatar
+            };
+        });
+
+    const newFriendRequests = friendRequests.map(req => ({
+        id: req.id,
+        type: 'friendRequest',
+        title: `New friend request from ${req.fromName}`,
+        avatar: req.fromAvatar
+    }));
+
+    setNotifications([...unreadMessages, ...newFriendRequests]);
+}, [unreadCounts, friendRequests, friends, user]);
 
   useEffect(() => {
     if (!user || friends.length === 0) {
@@ -114,11 +142,20 @@ export default function Friends() {
             onMouseEnter={() => setShowPopup(true)}
             onMouseLeave={() => setShowPopup(false)}
           >
-            <img src="src/assets/Bell.png" className="notification-bell" alt="Bell"/>
+            <img src="/assets/Bell.png" className="notification-bell" alt="Bell"/>
             {showPopup && (
               <div className="notification-popup">
                 <p>Notifications</p>
-                <p>No new notifications</p>
+                {notifications.length > 0 ? (
+                  notifications.map(notif => (
+                    <div key={notif.id} className="notification-item">
+                      <img src={notif.avatar || '/images/default-avatar.png'} alt="avatar" />
+                      <span>{notif.title}</span>
+                    </div>
+                  ))
+                ) : (
+                  <p>No new notifications</p>
+                )}
               </div>
             )}
           </div>
