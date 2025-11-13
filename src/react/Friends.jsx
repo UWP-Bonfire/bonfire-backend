@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../css/friends.css";
+import "../css/optionsMenu.css";
 import useFriends from './hooks/useFriends';
 import { auth, firestore } from '../firebase';
 import { signOut } from "firebase/auth";
@@ -12,13 +13,28 @@ import useFriendRequests from "./hooks/useFriendRequests";
 
 export default function Friends() {
   const navigate = useNavigate();
-  const { friends, loading, error } = useFriends();
+  const { friends, loading, error, unfriend } = useFriends();
   const { user, userProfile } = useAuth();
   const { requestPermission } = useNotifications();
   const [unreadCounts, setUnreadCounts] = useState({});
   const [showPopup, setShowPopup] = useState(false);
   const { requests: friendRequests } = useFriendRequests();
   const [notifications, setNotifications] = useState([]);
+  const [activeOptionsMenu, setActiveOptionsMenu] = useState(null);
+  const menuRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setActiveOptionsMenu(null);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
+
 
   useEffect(() => {
     requestPermission();
@@ -74,7 +90,7 @@ export default function Friends() {
   }, [friends, user]);
 
   const handleChatClick = (friendId) => {
-    navigate(`/app/messages`);
+    navigate(`/app/chat/${friendId}`);
   };
 
   const handleSignOut = () => {
@@ -88,6 +104,18 @@ export default function Friends() {
   const handleAddFriend = () => {
     navigate('/app/add-friend');
   };
+
+  const toggleOptionsMenu = (friendId) => {
+    setActiveOptionsMenu(activeOptionsMenu === friendId ? null : friendId);
+  };
+
+  const handleUnfriend = (friendId) => {
+    if (window.confirm("Are you sure you want to unfriend this user?")) {
+      unfriend(friendId);
+      setActiveOptionsMenu(null);
+    }
+  };
+
 
   if (loading) {
     return <div>Loading friends...</div>;
@@ -121,7 +149,7 @@ export default function Friends() {
 
         <div className="bottom-section">
           <div className="settings-btn" onClick={() => navigate("/app/settings")}>
-            <img src="src/assets/Settings.svg" alt="Settings" />
+            <img src="/assets/Settings.svg" alt="Settings" />
           </div>
           {user && userProfile && (
             <div className="user" onClick={() => navigate("/app/account")}>
@@ -181,8 +209,16 @@ export default function Friends() {
                         </div>
                         <div className="friend-actions">
                             <button className="chat-btn" onClick={() => handleChatClick(friend.id)}>
+                              <img src="/images/message.png" alt="Chat" />
                             </button>
-                            <button className="options-btn">⋮</button>
+                            <div className="options-menu-container" ref={menuRef}>
+                              <button className="options-btn" onClick={() => toggleOptionsMenu(friend.id)}>⋮</button>
+                              {activeOptionsMenu === friend.id && (
+                                <div className="options-menu">
+                                  <div className="options-menu-item" onClick={() => handleUnfriend(friend.id)}>Unfriend</div>
+                                </div>
+                              )}
+                            </div>
                         </div>
                     </div>
                  ))

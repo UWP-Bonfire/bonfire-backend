@@ -276,6 +276,16 @@ body {
   transition: background 0.2s;
 }
 
+.chat-btn img{
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+  
+}
+
+.options-btn {
+  background: #fff;
+}
 
 .chat-btn:hover,
 .options-btn:hover {
