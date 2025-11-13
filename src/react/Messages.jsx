@@ -102,7 +102,7 @@ export default function Messages() {
     const messagesEndRef = useRef(null);
   
     const scrollToBottom = () => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
     };
   
     useEffect(() => {
