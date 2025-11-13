@@ -15,6 +15,7 @@ export default function Friends() {
   const { user, userProfile } = useAuth();
   const { requestPermission } = useNotifications();
   const [unreadCounts, setUnreadCounts] = useState({});
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
     requestPermission();
@@ -108,7 +109,19 @@ export default function Friends() {
         <div className="main-header">
           <h1>Friends</h1>
           <button onClick={handleAddFriend} className="add-friend">Add Friend</button>
-          <img src="src/assets/Bell.png" className="notification-bell" alt="Bell"/>
+          <div 
+            className="notification-container"
+            onMouseEnter={() => setShowPopup(true)}
+            onMouseLeave={() => setShowPopup(false)}
+          >
+            <img src="src/assets/Bell.png" className="notification-bell" alt="Bell"/>
+            {showPopup && (
+              <div className="notification-popup">
+                <p>Notifications</p>
+                <p>No new notifications</p>
+              </div>
+            )}
+          </div>
           <button onClick={handleSignOut} className="sign-out-btn">Sign Out</button>
         </div>
         
@@ -131,7 +144,6 @@ export default function Friends() {
                         </div>
                         <div className="friend-actions">
                             <button className="chat-btn" onClick={() => handleChatClick(friend.id)}>
-                            💬
                             </button>
                             <button className="options-btn">⋮</button>
                         </div>
