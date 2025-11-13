@@ -14,7 +14,7 @@ import useFriendRequests from "./hooks/useFriendRequests";
 
 export default function Friends() {
   const navigate = useNavigate();
-  const { friends, loading, error, unfriend } = useFriends();
+  const { friends, loading, error, unfriend, muteUser, unmuteUser } = useFriends();
   const { user, userProfile } = useAuth();
   const { requestPermission } = useNotifications();
   const [unreadCounts, setUnreadCounts] = useState({});
@@ -48,13 +48,14 @@ export default function Friends() {
         .filter(([, count]) => count > 0)
         .map(([friendId]) => {
             const friend = friends.find(f => f.id === friendId);
+            if (friend?.isMuted) return null;
             return {
                 id: `msg-${friendId}`,
                 type: 'message',
                 title: `New message from ${friend?.name}`,
                 avatar: friend?.avatar
             };
-        });
+        }).filter(Boolean);
 
     const newFriendRequests = friendRequests.map(req => ({
         id: req.id,
@@ -73,6 +74,7 @@ export default function Friends() {
     }
 
     const unsubscribes = friends.map(friend => {
+      if (friend.isMuted) return () => {};
       const chatId = [user.uid, friend.id].sort().join('_');
       const messagesRef = collection(firestore, 'chats', chatId, 'messages');
       const q = query(messagesRef, where('read', '==', false), where('senderId', '==', friend.id));
@@ -117,6 +119,15 @@ export default function Friends() {
       setActiveOptionsMenu(null);
     }
   };
+
+  const handleMuteToggle = (friend) => {
+    if (friend.isMuted) {
+      unmuteUser(friend.id);
+    } else {
+      muteUser(friend.id);
+    }
+    setActiveOptionsMenu(null);
+  }
 
 
   if (loading) {
@@ -224,6 +235,9 @@ export default function Friends() {
                               {activeOptionsMenu === friend.id && (
                                 <div className="options-menu">
                                   <div className="options-menu-item" onClick={() => handleUnfriend(friend.id)}>Unfriend</div>
+                                  <div className="options-menu-item" onClick={() => handleMuteToggle(friend)}>
+                                    {friend.isMuted ? 'Unmute' : 'Mute'}
+                                  </div>
                                 </div>
                               )}
                             </div>

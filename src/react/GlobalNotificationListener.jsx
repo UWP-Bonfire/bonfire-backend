@@ -17,24 +17,18 @@ const GlobalNotificationListener = () => {
         return [uid1, uid2].sort().join('_');
     };
 
-    // --- State for Notification Logic ---
     const notifiedUsersRef = useRef(new Set());
     const lastTimestampRef = useRef(new Date().toISOString());
-
     const notifiedUsersKey = `notifiedUsers_${user?.uid}`;
     const lastTimestampKey = `lastTimestamp_${user?.uid}`;
 
-
-    // --- On Mount: Load state from sessionStorage ---
     useEffect(() => {
         if (!user) return;
         try {
             const storedNotifiedUsers = JSON.parse(sessionStorage.getItem(notifiedUsersKey) || '[]');
             notifiedUsersRef.current = new Set(storedNotifiedUsers);
-
             const storedTimestamp = sessionStorage.getItem(lastTimestampKey);
             lastTimestampRef.current = storedTimestamp || new Date().toISOString();
-
         } catch (e) {
             console.error("Failed to parse notification state from session storage", e);
             notifiedUsersRef.current = new Set();
@@ -42,8 +36,6 @@ const GlobalNotificationListener = () => {
         }
     }, [user, notifiedUsersKey, lastTimestampKey]);
 
-
-    // --- Effect for handling favicon count --- 
     useEffect(() => {
         if (!user || friends.length === 0) {
             updateFavicon(0);
@@ -51,6 +43,15 @@ const GlobalNotificationListener = () => {
         }
 
         const unsubscribes = friends.map(friend => {
+            if (friend.isMuted) {
+                setUnreadCounts(prevCounts => {
+                    const newCounts = { ...prevCounts };
+                    delete newCounts[friend.id];
+                    return newCounts;
+                });
+                return () => {}; // Return an empty unsubscribe function
+            }
+
             const chatId = getChatId(user.uid, friend.id);
             const messagesRef = collection(firestore, 'chats', chatId, 'messages');
             const q = query(messagesRef, where('read', '==', false), where('senderId', '==', friend.id));
@@ -66,17 +67,15 @@ const GlobalNotificationListener = () => {
         return () => unsubscribes.forEach(unsub => unsub());
     }, [friends, user]);
 
-
-    // --- Effect for handling new message notifications ---
     useEffect(() => {
         if (!user || friends.length === 0) {
             return;
         }
 
         const unsubscribes = friends.map(friend => {
+            if (friend.isMuted) return () => {};
             const chatId = getChatId(user.uid, friend.id);
             const messagesRef = collection(firestore, 'chats', chatId, 'messages');
-
             const q = query(
                 messagesRef,
                 where('timestamp', '>', new Date(lastTimestampRef.current)),
@@ -102,7 +101,6 @@ const GlobalNotificationListener = () => {
                             icon: friend.avatar || '/images/Default PFP.jpg'
                         }
                     );
-
                     notifiedUsersRef.current.add(friend.id);
                     sessionStorage.setItem(notifiedUsersKey, JSON.stringify(Array.from(notifiedUsersRef.current)));
                 }
@@ -115,17 +113,14 @@ const GlobalNotificationListener = () => {
                         sessionStorage.setItem(lastTimestampKey, newTimestamp);
                     }
                 }
-
             }, (error) => {
                 console.error(`Error in notification listener for chat with ${friend.name}:`, error);
             });
         });
 
         return () => unsubscribes.forEach(unsub => unsub());
-
     }, [user, friends, showNotification, notifiedUsersKey, lastTimestampKey]);
 
-    // --- Effect to update favicon AND reset notification status ---
     useEffect(() => {
         const totalUnread = Object.values(unreadCounts).reduce((sum, count) => sum + count, 0);
         updateFavicon(totalUnread);
@@ -133,7 +128,6 @@ const GlobalNotificationListener = () => {
         if (user) {
             let changed = false;
             const notifiedUsers = notifiedUsersRef.current;
-            
             Object.entries(unreadCounts).forEach(([friendId, count]) => {
                 if (count === 0 && notifiedUsers.has(friendId)) {
                     notifiedUsers.delete(friendId);
