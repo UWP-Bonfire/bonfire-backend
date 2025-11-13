@@ -1,0 +1,34 @@
+.notification-actions {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.notification-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 5px;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+}
+
+.notification-actions{
+    color: black;
+  }
+  
+  .accept-btn {
+    background-color: #4CAF50;
+    color: black;
+  }
+  
+  .decline-btn {
+    background-color: #F44336;
+    color: black;
+  }

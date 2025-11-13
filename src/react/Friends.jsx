@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import "../css/friends.css";
 import "../css/optionsMenu.css";
+import "../css/notifications.css";
 import useFriends from './hooks/useFriends';
 import { auth, firestore } from '../firebase';
 import { signOut } from "firebase/auth";
@@ -18,7 +19,7 @@ export default function Friends() {
   const { requestPermission } = useNotifications();
   const [unreadCounts, setUnreadCounts] = useState({});
   const [showPopup, setShowPopup] = useState(false);
-  const { requests: friendRequests } = useFriendRequests();
+  const { requests: friendRequests, acceptRequest, declineRequest } = useFriendRequests();
   const [notifications, setNotifications] = useState([]);
   const [activeOptionsMenu, setActiveOptionsMenu] = useState(null);
   const menuRef = useRef(null);
@@ -57,6 +58,7 @@ export default function Friends() {
 
     const newFriendRequests = friendRequests.map(req => ({
         id: req.id,
+        from: req.from,
         type: 'friendRequest',
         title: `New friend request from ${req.fromName}`,
         avatar: req.fromAvatar
@@ -179,6 +181,12 @@ export default function Friends() {
                     <div key={notif.id} className="notification-item">
                       <img src={notif.avatar || '/images/default-avatar.png'} alt="avatar" />
                       <span>{notif.title}</span>
+                      {notif.type === 'friendRequest' && (
+                        <div className="notification-actions">
+                            <button onClick={() => acceptRequest(notif.id, notif.from)} className="accept-btn">✓</button>
+                            <button onClick={() => declineRequest(notif.id)} className="decline-btn">X</button>
+                        </div>
+                      )}
                     </div>
                   ))
                 ) : (

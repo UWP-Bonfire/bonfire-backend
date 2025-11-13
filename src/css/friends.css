@@ -280,7 +280,7 @@ body {
   width: 20px;
   height: 20px;
   margin-left: 5px;
-  
+
 }
 
 .options-btn {
@@ -310,4 +310,18 @@ body {
     text-align: center;
     margin-top: 50px;
     color: #666;
+}
+
+.notification-actions{
+  color: black;
+}
+
+.accept-btn {
+  background-color: #4CAF50;
+  color: black;
+}
+
+.decline-btn {
+  background-color: #F44336;
+  color: black;
 }
