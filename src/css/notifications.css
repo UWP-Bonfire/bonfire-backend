@@ -5,7 +5,6 @@
 }
 
 .notification-actions button {
-    background: none;
     border: none;
     cursor: pointer;
     font-size: 18px;
@@ -17,18 +16,17 @@
     align-items: center;
     justify-content: center;
     transition: background-color 0.2s;
+    color: white;
 }
 
-.notification-actions{
-    color: black;
-  }
-  
-  .accept-btn {
-    background-color: #4CAF50;
-    color: black;
-  }
-  
-  .decline-btn {
-    background-color: #F44336;
-    color: black;
-  }
+.notification-actions button:hover {
+    opacity: 0.8;
+}
+
+.accept-btn {
+    background-color: #4CAF50; /* Green */
+}
+
+.decline-btn {
+    background-color: #F44336; /* Red */
+}
