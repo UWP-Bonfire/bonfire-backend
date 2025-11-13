@@ -49,7 +49,7 @@ const GlobalNotificationListener = () => {
                     delete newCounts[friend.id];
                     return newCounts;
                 });
-                return () => {}; // Return an empty unsubscribe function
+                return () => {};
             }
 
             const chatId = getChatId(user.uid, friend.id);
@@ -93,7 +93,7 @@ const GlobalNotificationListener = () => {
                     }
                 });
 
-                if (newMessagesFromFriend.length > 0 && !notifiedUsersRef.current.has(friend.id)) {
+                if (newMessagesFromFriend.length > 0 && !notifiedUsersRef.current.has(friend.id) && !friend.isMuted) {
                     showNotification(
                         `New message from ${friend.name || 'Someone'}`,
                         {
@@ -122,24 +122,32 @@ const GlobalNotificationListener = () => {
     }, [user, friends, showNotification, notifiedUsersKey, lastTimestampKey]);
 
     useEffect(() => {
-        const totalUnread = Object.values(unreadCounts).reduce((sum, count) => sum + count, 0);
+        const mutedFriendIds = new Set(
+            friends.filter(f => f.isMuted).map(f => f.id)
+        );
+    
+        const totalUnread = Object.entries(unreadCounts)
+            .filter(([friendId]) => !mutedFriendIds.has(friendId))
+            .reduce((sum, [, count]) => sum + count, 0);
+    
         updateFavicon(totalUnread);
-
+    
         if (user) {
             let changed = false;
             const notifiedUsers = notifiedUsersRef.current;
+            
             Object.entries(unreadCounts).forEach(([friendId, count]) => {
-                if (count === 0 && notifiedUsers.has(friendId)) {
+                if ((count === 0 || mutedFriendIds.has(friendId)) && notifiedUsers.has(friendId)) {
                     notifiedUsers.delete(friendId);
                     changed = true;
                 }
             });
-
+    
             if (changed) {
                 sessionStorage.setItem(notifiedUsersKey, JSON.stringify(Array.from(notifiedUsers)));
             }
         }
-    }, [unreadCounts, updateFavicon, user, notifiedUsersKey]);
+    }, [unreadCounts, friends, updateFavicon, user, notifiedUsersKey]);
 
     return null;
 };
