@@ -89,8 +89,8 @@ export default function Friends() {
     };
   }, [friends, user]);
 
-  const handleChatClick = (friendId) => {
-    navigate(`/app/chat/${friendId}`);
+  const handleChatClick = () => {
+    navigate(`/app/chat`);
   };
 
   const handleSignOut = () => {
