@@ -36,6 +36,12 @@ const MessageInput = ({ onSendMessage }) => {
 const MessageRow = ({ message, user, userProfiles, isLast, isGlobalChat }) => {
     const isSent = message.senderId === user.uid;
 
+    const formatTimestamp = (timestamp) => {
+        if (!timestamp) return '';
+        const date = timestamp.toDate();
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
+
     return (
         <div className={`message-row ${isSent ? "sent" : "received"}`}>
             <img
@@ -46,11 +52,14 @@ const MessageRow = ({ message, user, userProfiles, isLast, isGlobalChat }) => {
             <div className="message-bubble">
                 <span className="msg-name">{userProfiles[message.senderId]?.name || 'Anonymous'}</span>
                 <div className="message-text">{message.text}</div>
-                {!isGlobalChat && isSent && isLast && (
-                    <div className={`read-receipt ${message.read ? 'read' : 'unread'}`}>
-                        {message.read ? '✓✓' : '✓'}
-                    </div>
-                )}
+                <div className="message-meta">
+                    <span className="timestamp">{formatTimestamp(message.timestamp)}</span>
+                    {!isGlobalChat && isSent && isLast && (
+                        <div className={`read-receipt ${message.read ? 'read' : 'unread'}`}>
+                            {message.read ? '✓✓' : '✓'}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
