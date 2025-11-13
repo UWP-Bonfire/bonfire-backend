@@ -108,6 +108,7 @@ export default function Friends() {
         <div className="main-header">
           <h1>Friends</h1>
           <button onClick={handleAddFriend} className="add-friend">Add Friend</button>
+          <img src="src/assets/Bell.png" className="notification-bell" alt="Bell"/>
           <button onClick={handleSignOut} className="sign-out-btn">Sign Out</button>
         </div>
         
