@@ -4,6 +4,8 @@ import { useAuth } from "./hooks/useAuth";
 import useChat from "./hooks/useChat";
 import useFriends from "./hooks/useFriends";
 import "../css/messages.css";
+import { firestore } from "../firebase";
+import { collection, query, where, onSnapshot } from "firebase/firestore";
 
 const MessageInput = ({ onSendMessage }) => {
     const [newMessage, setNewMessage] = useState('');
@@ -31,14 +33,14 @@ const MessageInput = ({ onSendMessage }) => {
     );
 };
 
-const MessageRow = ({ message, user, userProfiles, onRead, isLast, isGlobalChat }) => {
+const MessageRow = ({ message, user, userProfiles, isLast, isGlobalChat }) => {
     const isSent = message.senderId === user.uid;
 
-    useEffect(() => {
-        if (!isSent && !message.read) {
-            onRead(message.id);
-        }
-    }, [isSent, message.read, message.id, onRead]);
+    const formatTimestamp = (timestamp) => {
+        if (!timestamp) return '';
+        const date = timestamp.toDate();
+        return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    };
 
     return (
         <div className={`message-row ${isSent ? "sent" : "received"}`}>
@@ -50,11 +52,14 @@ const MessageRow = ({ message, user, userProfiles, onRead, isLast, isGlobalChat 
             <div className="message-bubble">
                 <span className="msg-name">{userProfiles[message.senderId]?.name || 'Anonymous'}</span>
                 <div className="message-text">{message.text}</div>
-                {!isGlobalChat && isSent && isLast && (
-                    <div className={`read-receipt ${message.read ? 'read' : 'unread'}`}>
-                        {message.read ? '✓✓' : '✓'}
-                    </div>
-                )}
+                <div className="message-meta">
+                    <span className="timestamp">{formatTimestamp(message.timestamp)}</span>
+                    {!isGlobalChat && isSent && isLast && (
+                        <div className={`read-receipt ${message.read ? 'read' : 'unread'}`}>
+                            {message.read ? '✓✓' : '✓'}
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
@@ -65,6 +70,40 @@ export default function Messages() {
   const { user } = useAuth();
   const { friends, loading: friendsLoading } = useFriends();
   const [selectedFriend, setSelectedFriend] = useState(null);
+  const [unreadCounts, setUnreadCounts] = useState({});
+
+  useEffect(() => {
+    if (!user || friends.length === 0) {
+      return;
+    }
+
+    const unsubscribes = friends.map(friend => {
+        if (friend.isMuted) {
+            setUnreadCounts(prevCounts => {
+                const newCounts = { ...prevCounts };
+                delete newCounts[friend.id];
+                return newCounts;
+            });
+            return () => {};
+        }
+
+        const chatId = [user.uid, friend.id].sort().join('_');
+        const messagesRef = collection(firestore, 'chats', chatId, 'messages');
+        const q = query(messagesRef, where('read', '==', false), where('senderId', '==', friend.id));
+
+        const unsubscribe = onSnapshot(q, snapshot => {
+            setUnreadCounts(prevCounts => ({
+                ...prevCounts,
+                [friend.id]: snapshot.size,
+            }));
+        });
+        return unsubscribe;
+    });
+
+    return () => {
+        unsubscribes.forEach(unsub => unsub());
+    };
+}, [friends, user]);
   
   const handleBack = () => {
     navigate("/app");
@@ -79,12 +118,19 @@ export default function Messages() {
     const messagesEndRef = useRef(null);
   
     const scrollToBottom = () => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
     };
   
     useEffect(() => {
-      scrollToBottom();
-    }, [messages]);
+        scrollToBottom();
+        if (messages.length > 0) {
+            messages.forEach(message => {
+                if (message.senderId !== user.uid && !message.read) {
+                    markMessageAsRead(message.id);
+                }
+            });
+        }
+    }, [messages, user.uid, markMessageAsRead]);
 
     return (
       <>
@@ -106,7 +152,6 @@ export default function Messages() {
                 message={message}
                 user={user}
                 userProfiles={userProfiles}
-                onRead={markMessageAsRead}
                 isLast={index === messages.length - 1}
                 isGlobalChat={isGlobalChat}
               />
@@ -143,6 +188,9 @@ export default function Messages() {
                 >
                   <img src={friend.avatar || '/images/default-avatar.png'} alt={friend.name} />
                   <span>{friend.name}</span>
+                  {unreadCounts[friend.id] > 0 && !friend.isMuted && (
+                    <span className="unread-count">{unreadCounts[friend.id]}</span>
+                  )}
                 </div>
               ))
             )}

@@ -1,0 +1,32 @@
+.notification-actions {
+    display: flex;
+    gap: 10px;
+    margin-left: auto;
+}
+
+.notification-actions button {
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    padding: 5px;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s;
+    color: white;
+}
+
+.notification-actions button:hover {
+    opacity: 0.8;
+}
+
+.accept-btn {
+    background-color: #4CAF50; /* Green */
+}
+
+.decline-btn {
+    background-color: #F44336; /* Red */
+}

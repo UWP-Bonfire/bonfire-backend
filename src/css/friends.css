@@ -4,7 +4,6 @@ body {
   background: #fff;
 }
 
-
 .container {
   display: flex;
   height: 100vh;
@@ -45,7 +44,7 @@ body {
   cursor: pointer;
   transition: background 0.2s;
   width: 100%;
-  padding: 4px 8px;
+  padding: 4px 0px;
   border-radius: 10px;
 }
 
@@ -57,6 +56,7 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 50%;
+  margin-left: 5px;
 }
 
 .dm span {
@@ -99,10 +99,10 @@ body {
   align-items: center;
   gap: 10px;
   font-size: 16px;
-  background: #d9d9d9;
+  background: #7a5c4a;
   border-radius: 20px;
   padding: 8px 12px;
-  color: #000;
+  color: #fff;
 }
 
 .user img {
@@ -137,7 +137,7 @@ body {
   color: #ffd9ba;
 }
 
-.add-friend {
+.add-friend, .sign-out-btn {
   padding: 8px 12px;
   border: none;
   border-radius: 10px;
@@ -148,9 +148,69 @@ body {
   transition: background 0.2s;
 }
 
-.add-friend:hover {
+.add-friend:hover, .sign-out-btn:hover {
   background: #e09c74;
 }
+
+.notification-container {
+  position: relative;
+}
+
+.notification-bell {
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+  cursor: pointer;
+}
+
+.notification-popup {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  width: 300px;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  z-index: 1000;
+  padding: 0;
+  overflow: hidden;
+}
+
+.notification-popup p {
+  padding: 15px;
+  font-size: 16px;
+  font-weight: bold;
+  text-align: center;
+  color: #333;
+  margin: 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.notification-item {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+  transition: background-color 0.2s;
+}
+
+.notification-item:hover {
+  background-color: #f0f0f0;
+}
+
+.notification-item img {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  margin-right: 15px;
+}
+
+.notification-item span {
+  font-size: 14px;
+  color: #333;
+}
+
 
 /* Friends List */
 .friends-container {
@@ -167,7 +227,7 @@ body {
   background-color: #d3d3d3;
   border-radius: 8px;
   width: 95%;
-  padding: 50px 20px;
+  padding: 20px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -182,13 +242,25 @@ body {
   width: 85px;
   height: 85px;
   border-radius: 50%;
+  margin-right: 20px;
 }
 
-.friend-card span {
-  flex: 1;
+.friend-info {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.friend-info .friend-name {
   font-size: 22px;
   color: #333;
-  margin-left: 10px;
+}
+
+.friend-actions {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 /* Buttons on friend cards */
@@ -200,14 +272,42 @@ body {
   height: 42px;
   cursor: pointer;
   background: #fff;
-  margin-left: 6px;
   font-size: 20px;
   transition: background 0.2s;
 }
 
+.chat-btn img{
+  width: 20px;
+  height: 20px;
+  margin-left: 5px;
+  
+}
+
+.options-btn {
+  background: #fff;
+}
 
 .chat-btn:hover,
 .options-btn:hover {
   background: #ccc;
 }
 
+.unread-count {
+    background-color: #c84848;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+    margin-right: 10px;
+}
+
+.no-friends-message {
+    text-align: center;
+    margin-top: 50px;
+    color: #666;
+}

@@ -243,7 +243,7 @@
   transition: background 0.3s;
 }
 
-.send-.send-btn img:hover {
+.send-btn:hover img {
   background: #e0a67c;
 }
 
@@ -343,9 +343,34 @@
 .read-receipt {
     font-size: 12px;
     color: #a0a0a0;
-    text-align: right;
 }
 
 .read-receipt.read {
     color: #4caf50;
+}
+
+.unread-count {
+    background-color: #c84848;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 12px;
+    margin-left: auto;
+}
+
+.message-meta {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    margin-top: 5px;
+    align-self: flex-end;
+}
+
+.timestamp {
+    font-size: 11px;
+    color: #555;
+}
+
+.message-row.sent .timestamp {
+    color: #f0f0f0;
 }

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { doc, getFirestore, setDoc } from "firebase/firestore";
 import { useAuth } from "./hooks/useAuth";
 import "../css/personalization.css";
 
 export default function Personalization() {
+  const navigate = useNavigate();
   const { user, userProfile, loading } = useAuth();
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
@@ -134,6 +136,9 @@ export default function Personalization() {
 
         <button className="save-btn" onClick={handleSave}>
           Save Changes
+        </button>
+        <button className="back-btn" onClick={() => navigate("/app/account")}>
+          ← Back to Account
         </button>
       </div>
     </div>

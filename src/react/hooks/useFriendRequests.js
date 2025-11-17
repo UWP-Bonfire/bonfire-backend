@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { firestore } from '../../firebase';
-import { collection, query, where, onSnapshot, doc, updateDoc, arrayUnion, deleteDoc } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, doc, updateDoc, arrayUnion, deleteDoc, getDoc } from 'firebase/firestore';
 import { useAuth } from './useAuth';
 
 const useFriendRequests = () => {
@@ -17,8 +17,12 @@ const useFriendRequests = () => {
 
         const q = query(collection(firestore, 'friendRequests'), where('to', '==', user.uid), where('status', '==', 'pending'));
 
-        const unsubscribe = onSnapshot(q, (snapshot) => {
-            const requestsData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+        const unsubscribe = onSnapshot(q, async (snapshot) => {
+            const requestsData = await Promise.all(snapshot.docs.map(async (d) => {
+                const request = { id: d.id, ...d.data() };
+                const userDoc = await getDoc(doc(firestore, 'users', request.from));
+                return { ...request, fromName: userDoc.data()?.name, fromAvatar: userDoc.data()?.avatar };
+            }));
             setRequests(requestsData);
             setLoading(false);
         }, (err) => {
