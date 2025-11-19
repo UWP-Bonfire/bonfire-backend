@@ -18,7 +18,7 @@ export default function Account() {
   // Use Firestore data from userProfile with fallbacks
   const displayName = userProfile.displayName || "User12";
   const bio = userProfile.bio || "Welcome to Bonfire!";
-  const avatar = userProfile.avatar || "/images/IMG_1843.png";
+  const avatar = userProfile.avatar || "/images/icon1.png";
   const usernameColor = userProfile.usernameColor || "#c84848";
   const bgColor = userProfile.bgColor || "#ffd9ba";
 
@@ -28,18 +28,18 @@ export default function Account() {
 
       <div className="account-card">
         <div className="left-section">
-          <img src={userProfile.avatar} alt="Profile" className="account-avatar" />
+          <img src={avatar} alt="Profile" className="account-avatar" />
         </div>
 
         <div className="right-section">
           <label>Username</label>
-          <input type="text" value={userProfile.displayName} readOnly />
+          <input type="text" value={displayName} readOnly />
 
           <label>Email</label>
           <input type="text" value={userProfile.email} readOnly />
 
           <label>Bio</label>
-          <textarea value={userProfile.bio} readOnly />
+          <textarea value={bio} readOnly />
         </div>
       </div>
 

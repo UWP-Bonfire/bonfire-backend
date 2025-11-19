@@ -11,6 +11,9 @@ import { useAuth } from './hooks/useAuth';
 import useNotifications from './hooks/useNotifications';
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import useFriendRequests from "./hooks/useFriendRequests";
+import settingsIcon from '../assets/Settings.svg';
+import bellIcon from '../assets/Bell.png';
+import messageIcon from '../assets/images/message.png';
 
 export default function Friends() {
   const navigate = useNavigate();
@@ -151,7 +154,7 @@ export default function Friends() {
               key={friend.id}
               onClick={() => handleChatClick(friend.id)}
             >
-              <img src={friend.avatar || '/images/default-avatar.png'} alt={friend.name} />
+              <img src={friend.avatar || '/images/Default PFP.jpg'} alt={friend.name} />
               <span>{friend.name}</span>
               {unreadCounts[friend.id] > 0 && (
                 <span className="unread-count">{unreadCounts[friend.id]}</span>
@@ -162,7 +165,7 @@ export default function Friends() {
 
         <div className="bottom-section">
           <div className="settings-btn" onClick={() => navigate("/app/settings")}>
-            <img src="/assets/Settings.svg" alt="Settings" />
+            <img src={settingsIcon} alt="Settings" />
           </div>
           {user && userProfile && (
             <div className="user" onClick={() => navigate("/app/account")}>
@@ -183,14 +186,14 @@ export default function Friends() {
             onMouseEnter={() => setShowPopup(true)}
             onMouseLeave={() => setShowPopup(false)}
           >
-            <img src="/assets/Bell.png" className="notification-bell" alt="Bell"/>
+            <img src={bellIcon} className="notification-bell" alt="Bell"/>
             {showPopup && (
               <div className="notification-popup">
                 <p>Notifications</p>
                 {notifications.length > 0 ? (
                   notifications.map(notif => (
                     <div key={notif.id} className="notification-item">
-                      <img src={notif.avatar || '/images/default-avatar.png'} alt="avatar" />
+                      <img src={notif.avatar || '/images/Default PFP.jpg'} alt="avatar" />
                       <span>{notif.title}</span>
                       {notif.type === 'friendRequest' && (
                         <div className="notification-actions">
@@ -219,7 +222,7 @@ export default function Friends() {
             ) : (
                 friends.map((friend) => (
                     <div className="friend-card" key={friend.id}>
-                        <img src={friend.avatar || '/images/default-avatar.png'} alt={friend.name} />
+                        <img src={friend.avatar || '/images/Default PFP.jpg'} alt={friend.name} />
                         <div className="friend-info">
                             <span className="friend-name">{friend.name}</span>
                             {unreadCounts[friend.id] > 0 && (
@@ -228,7 +231,7 @@ export default function Friends() {
                         </div>
                         <div className="friend-actions">
                             <button className="chat-btn" onClick={() => handleChatClick(friend.id)}>
-                              <img src="/images/message.png" alt="Chat" />
+                              <img src={messageIcon} alt="Chat" />
                             </button>
                             <div className="options-menu-container" ref={menuRef}>
                               <button className="options-btn" onClick={() => toggleOptionsMenu(friend.id)}>⋮</button>

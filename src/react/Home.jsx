@@ -2,13 +2,14 @@
 import React from 'react';
 import '../css/Home.css';
 import { Link } from 'react-router-dom';
+import logo from '../assets/images/Logo.png';
 
 function Home() {
     return (
         <div className="home-container">
             <header className="header">
                 <nav className="navbar">
-                    <img src="/images/Logo.png" alt="Bonfire Logo" className="logo" />
+                    <img src={logo} alt="Bonfire Logo" className="logo" />
                     <Link to="/auth" className="login-button">Login</Link>
                 </nav>
                 <div className="hero-section">

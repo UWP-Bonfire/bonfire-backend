@@ -6,6 +6,8 @@ import useFriends from "./hooks/useFriends";
 import "../css/messages.css";
 import { firestore } from "../firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
+import arrowIcon from "../assets/images/arrow.png";
+import rightArrowIcon from "../assets/images/right-arrow.png";
 
 const MessageInput = ({ onSendMessage }) => {
     const [newMessage, setNewMessage] = useState('');
@@ -27,7 +29,7 @@ const MessageInput = ({ onSendMessage }) => {
                 placeholder="Type a message..."
             />
             <button type="submit" className="icon-btn send-btn" aria-label="Send message">
-                <img src="/images/arrow.png" alt="Send" />
+                <img src={arrowIcon} alt="Send" />
             </button>
         </form>
     );
@@ -45,7 +47,7 @@ const MessageRow = ({ message, user, userProfiles, isLast, isGlobalChat }) => {
     return (
         <div className={`message-row ${isSent ? "sent" : "received"}`}>
             <img
-                src={userProfiles[message.senderId]?.avatar || '/images/default-avatar.png'}
+                src={userProfiles[message.senderId]?.avatar || '/images/Default PFP.jpg'}
                 alt={userProfiles[message.senderId]?.name || 'Anonymous'}
                 className="msg-avatar"
             />
@@ -136,7 +138,7 @@ export default function Messages() {
       <>
         <div className="chat-header">
           <img
-            src={friend.avatar || '/images/default-avatar.png'}
+            src={friend.avatar || '/images/Default PFP.jpg'}
             alt={friend.name}
             className="chat-header-avatar"
           />
@@ -171,7 +173,7 @@ export default function Messages() {
       <aside className="sidebar">
         <div className="sidebar-header">
           <button className="back-btn" onClick={handleBack} aria-label="Go back">
-            <img src="/images/right-arrow.png" alt="Back" />
+            <img src={rightArrowIcon} alt="Back" />
           </button>
           <h2>Messages</h2>
         </div>
@@ -186,7 +188,7 @@ export default function Messages() {
                   key={friend.id}
                   onClick={() => handleFriendClick(friend)}
                 >
-                  <img src={friend.avatar || '/images/default-avatar.png'} alt={friend.name} />
+                  <img src={friend.avatar || '/images/Default PFP.jpg'} alt={friend.name} />
                   <span>{friend.name}</span>
                   {unreadCounts[friend.id] > 0 && !friend.isMuted && (
                     <span className="unread-count">{unreadCounts[friend.id]}</span>

@@ -9,7 +9,7 @@ export default function Personalization() {
   const { user, userProfile, loading } = useAuth();
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
-  const [avatar, setAvatar] = useState("");
+  const [avatar, setAvatar] = useState("/images/icon1.png"); // Initialize with a default value
   const [usernameColor, setUsernameColor] = useState("");
   const [bgColor, setBgColor] = useState("");
 
@@ -17,29 +17,13 @@ export default function Personalization() {
     if (userProfile) {
       setDisplayName(userProfile.displayName || "User12");
       setBio(userProfile.bio || "Welcome to Bonfire!");
-      setAvatar(userProfile.avatar || "/images/IMG_1843.png");
+      setAvatar(userProfile.avatar || "/images/icon1.png");
       setUsernameColor(userProfile.usernameColor || "#c84848");
       setBgColor(userProfile.bgColor || "#ffd9ba");
     }
   }, [userProfile]);
 
-  const presetAvatars = [
-    "/images/IMG_1843.png",
-    "/images/IMG_1844.png",
-    "/images/IMG_1845.png",
-    "/images/IMG_1846.png",
-    "/images/IMG_1847.png",
-    "/images/IMG_1848.png",
-    "/images/IMG_1849.png",
-    "/images/IMG_1850.png",
-    "/images/IMG_1851.png",
-    "/images/IMG_1852.png",
-    "/images/IMG_1853.png",
-    "/images/IMG_1854.png",
-    "/images/IMG_1855.png",
-    "/images/IMG_1856.png",
-    "/images/IMG_1857.png",
-  ];
+  const presetAvatars = Array.from({ length: 15 }, (_, i) => `/images/icon${i + 1}.png`);
 
   const handleSave = async () => {
     if (!user) return;
