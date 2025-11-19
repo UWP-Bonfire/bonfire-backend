@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://Frogger25.github.io/bonfire-backend",
+  "homepage": "https://UWP-Bonfire.github.io/bonfire-backend",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
