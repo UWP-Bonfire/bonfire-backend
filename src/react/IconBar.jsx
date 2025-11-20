@@ -11,13 +11,13 @@ function IconBar() {
     return (
         <div className="icon-bar">
             <div className="icons-top">
-                <Icon to="/app/add-friend" imgSrc="/images/search.png" alt="Add Friend" />
-                <Icon to="/app/personalization" imgSrc="/images/settings.png" alt="Settings" />
-                <Icon to="/app/friends" imgSrc="/images/groups.png" alt="Friends" />
-                <Icon to="/app/messages" imgSrc="/images/messages.png" alt="Messages" />
+                <Icon to="/app/add-friend" imgSrc="images/search.png" alt="Add Friend" />
+                <Icon to="/app/personalization" imgSrc="images/settings.png" alt="Settings" />
+                <Icon to="/app/friends" imgSrc="images/groups.png" alt="Friends" />
+                <Icon to="/app/messages" imgSrc="images/messages.png" alt="Messages" />
             </div>
             <div className="icons-bottom">
-                <Icon to="/app/account" imgSrc="/images/profile.png" alt="Account" />
+                <Icon to="/app/account" imgSrc="images/profile.png" alt="Account" />
             </div>
         </div>
     );

@@ -1,15 +1,34 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { doc, getFirestore, setDoc } from "firebase/firestore";
+import {
+  doc,
+  getFirestore,
+  setDoc,
+} from "firebase/firestore";
 import { useAuth } from "./hooks/useAuth";
 import "../css/personalization.css";
+import icon1 from "../assets/icons/icon1.png";
+import icon2 from "../assets/icons/icon2.png";
+import icon3 from "../assets/icons/icon3.png";
+import icon4 from "../assets/icons/icon4.png";
+import icon5 from "../assets/icons/icon5.png";
+import icon6 from "../assets/icons/icon6.png";
+import icon7 from "../assets/icons/icon7.png";
+import icon8 from "../assets/icons/icon8.png";
+import icon9 from "../assets/icons/icon9.png";
+import icon10 from "../assets/icons/icon10.png";
+import icon11 from "../assets/icons/icon11.png";
+import icon12 from "../assets/icons/icon12.png";
+import icon13 from "../assets/icons/icon13.png";
+import icon14 from "../assets/icons/icon14.png";
+import icon15 from "../assets/icons/icon15.png";
 
 export default function Personalization() {
   const navigate = useNavigate();
   const { user, userProfile, loading } = useAuth();
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
-  const [avatar, setAvatar] = useState("");
+  const [avatar, setAvatar] = useState(icon1); // Initialize with a default value
   const [usernameColor, setUsernameColor] = useState("");
   const [bgColor, setBgColor] = useState("");
 
@@ -17,28 +36,28 @@ export default function Personalization() {
     if (userProfile) {
       setDisplayName(userProfile.displayName || "User12");
       setBio(userProfile.bio || "Welcome to Bonfire!");
-      setAvatar(userProfile.avatar || "/images/IMG_1843.png");
+      setAvatar(userProfile.avatar || icon1);
       setUsernameColor(userProfile.usernameColor || "#c84848");
       setBgColor(userProfile.bgColor || "#ffd9ba");
     }
   }, [userProfile]);
 
   const presetAvatars = [
-    "/images/IMG_1843.png",
-    "/images/IMG_1844.png",
-    "/images/IMG_1845.png",
-    "/images/IMG_1846.png",
-    "/images/IMG_1847.png",
-    "/images/IMG_1848.png",
-    "/images/IMG_1849.png",
-    "/images/IMG_1850.png",
-    "/images/IMG_1851.png",
-    "/images/IMG_1852.png",
-    "/images/IMG_1853.png",
-    "/images/IMG_1854.png",
-    "/images/IMG_1855.png",
-    "/images/IMG_1856.png",
-    "/images/IMG_1857.png",
+    icon1,
+    icon2,
+    icon3,
+    icon4,
+    icon5,
+    icon6,
+    icon7,
+    icon8,
+    icon9,
+    icon10,
+    icon11,
+    icon12,
+    icon13,
+    icon14,
+    icon15,
   ];
 
   const handleSave = async () => {
@@ -48,14 +67,18 @@ export default function Personalization() {
     const userRef = doc(db, "users", user.uid);
 
     try {
-      await setDoc(userRef, {
-        ...userProfile, // Preserve existing data
-        displayName,
-        bio,
-        avatar,
-        usernameColor,
-        bgColor,
-      }, { merge: true }); // Use merge to avoid overwriting other fields
+      await setDoc(
+        userRef,
+        {
+          ...userProfile, // Preserve existing data
+          displayName,
+          bio,
+          avatar,
+          usernameColor,
+          bgColor,
+        },
+        { merge: true }
+      ); // Use merge to avoid overwriting other fields
       alert("Your customizations have been saved!");
     } catch (error) {
       console.error("Error saving customizations: ", error);
