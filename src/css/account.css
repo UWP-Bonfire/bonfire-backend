@@ -90,7 +90,10 @@ textarea {
 }
 
 /* Base button style */
-.btn {
+.account-buttons .back-btn,
+.account-buttons .edit-btn,
+.account-buttons .btn.info,
+.account-buttons .btn.logout {
   border: none;
   border-radius: 10px;
   font-size: 1rem;
@@ -105,39 +108,41 @@ textarea {
   justify-content: center;
   gap: 8px;
   text-align: center;
+  margin: 0;
+  padding: 0;
+  vertical-align: middle;
 }
 
-/* Default brown style */
-.btn.back,
-.btn.edit {
-  background-color: #3c2b23;
-  color: #fff;
+.account-buttons .back-btn:hover,
+.account-buttons .edit-btn:hover,
+.account-buttons .btn.info:hover,
+.account-buttons .btn.logout:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 }
 
-.btn.back:hover,
-.btn.edit:hover {
-  background-color: #5a3d31;
-}
-
-/* Change Info (beige tone) */
-.btn.info {
+/* Unified button style */
+.account-buttons .back-btn,
+.account-buttons .edit-btn,
+.account-buttons .btn.info {
   background-color: #ffd9ba;
   color: #3c2b23;
 }
 
-.btn.info:hover {
+.account-buttons .back-btn:hover,
+.account-buttons .edit-btn:hover,
+.account-buttons .btn.info:hover {
   background-color: #f4b991;
 }
 
 /* Logout (red) */
-.btn.logout {
+.account-buttons .btn.logout {
   background-color: #c84848;
   color: #fff;
 }
 
-.btn.logout:hover {
+.account-buttons .btn.logout:hover {
   background-color: #a93636;
-  transform: translateY(-2px);
 }
 
 /* Responsive layout */
@@ -148,7 +153,10 @@ textarea {
     gap: 14px;
   }
 
-  .btn {
+  .account-buttons .back-btn,
+  .account-buttons .edit-btn,
+  .account-buttons .btn.info,
+  .account-buttons .btn.logout {
     width: 100%;
     max-width: 250px;
   }
