@@ -1,9 +1,9 @@
 .account-container {
-   background: linear-gradient(
+  background: linear-gradient(
     180deg,
-    rgba(231, 197, 134, 0.93) 5%,
-    #db976a 48%,
-    rgba(200, 72, 72, 0.67) 89%
+    var(--bg-1) 5%,
+    var(--bg-2) 48%,
+    var(--bg-3) 89%
   );
   min-height: 100vh;
   padding: 40px;
@@ -21,7 +21,7 @@
 }
 
 .account-card {
-  background: #fff8f3;
+  background: var(--card-bg);
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -78,56 +78,78 @@ textarea {
   height: 80px;
 }
 
+/* ---------- Buttons ---------- */
 .account-buttons {
-  margin-top: 25px;
-  display: flex;
-  gap: 20px;
-}
-/* Button area adjustments */
-.account-buttons {
-  margin-top: 30px;
+  margin-top: 40px;
   display: flex;
   justify-content: center;
-  gap: 16px;
-  flex-wrap: wrap; /* allows buttons to stack on smaller screens */
+  align-items: center;
+  gap: 20px;
+  flex-wrap: wrap;
+  width: 100%;
 }
 
-/* Back and Edit buttons */
-.back-btn,
-.edit-btn {
-  background-color: #3c2b23;
-  color: #fff;
+/* Base button style */
+.btn {
   border: none;
-  padding: 12px 28px;
   border-radius: 10px;
   font-size: 1rem;
   cursor: pointer;
   font-weight: 600;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
-  transition: transform 0.2s ease, background-color 0.3s ease;
+  transition: all 0.25s ease;
+  width: 220px;
+  height: 55px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-align: center;
 }
 
-.back-btn:hover,
-.edit-btn:hover {
+/* Default brown style */
+.btn.back,
+.btn.edit {
+  background-color: #3c2b23;
+  color: #fff;
+}
+
+.btn.back:hover,
+.btn.edit:hover {
+  background-color: #5a3d31;
+}
+
+/* Change Info (beige tone) */
+.btn.info {
+  background-color: #ffd9ba;
+  color: #3c2b23;
+}
+
+.btn.info:hover {
+  background-color: #f4b991;
+}
+
+/* Logout (red) */
+.btn.logout {
+  background-color: #c84848;
+  color: #fff;
+}
+
+.btn.logout:hover {
+  background-color: #a93636;
   transform: translateY(-2px);
 }
 
-.edit-btn {
-  background-color: #c84848;
-}
-
-.edit-btn:hover {
-  background-color: #a93636;
-}
-
+/* Responsive layout */
+@media (max-width: 650px) {
   .account-buttons {
     flex-direction: column;
-    gap: 12px;
+    align-items: center;
+    gap: 14px;
   }
 
-  .back-btn,
-  .edit-btn {
+  .btn {
     width: 100%;
-    max-width: 220px;
+    max-width: 250px;
   }
-
+}

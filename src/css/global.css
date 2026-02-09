@@ -1,52 +1,148 @@
-html {
-    box-sizing: border-box;
-  }
-  
-  *,
-  *::before,
-  *::after {
-    box-sizing: inherit;
-  }
-
 body {
-    margin: 0;
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-      'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-      sans-serif;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-  }
+  margin: 0;
+  font-family: "Jeju Hallasan", sans-serif;
+  background: #fff;
+}
 
-  code {
-    font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-      monospace;
-  }
+/* Light mode*/
+:root {
+  /* Background Gradient */
+  --bg-1: #e7c586;
+  --bg-2: #db976a;
+  --bg-3: #c84848;
 
-  .container {
-    display: flex;
-    height: 100vh;
-  }
+  /* Text */
+  --text-main: #3c2b23;
 
-  .icon-bar {
-    width: 60px;
-    background: #f0f0f0;
-    padding: 20px 0;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: space-between;
-  }
+  /* Accent buttons */
+  --accent-1: #f4b991;
+  --accent-2: #e0a67c;
 
-  .icon-bar .icons-top img, .icon-bar .icons-bottom img {
-    width: 32px;
-    height: 32px;
-    margin-bottom: 20px;
-    cursor: pointer;
-  }
+  /* Cards */
+  --card-bg: #fff8f3;
 
-  .main {
-    flex: 1;
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
+  /* Sidebar */
+  --sidebar-bg: #a76554;
+  --sidebar-hover: #7a5c4a;
+  --sidebar-text: #ffd9ba;
+
+  /* Header */
+  --header-bg: #4e280c;
+  --header-text: #ffd9ba;
+  --header-border: #3a1e09;
+  
+
+  /* Input */
+  --input-bg: #f5cba7;
+  --input-text: #000;
+  --input-border-top: #3a1e09;
+    --sidbar-title: hsl(27, 39%, 78%);
+
+  /* Receipt */
+  --check-gray: #e9e1d6;
+  --check-blue: #1f87ff;
+
+  /* Avatar border */
+  --avatar-border: #ffd9ba;
+
+ --friend-card-bg: #f5cba7;
+
+  /* Message bubble colors (light mode) */
+  --msg-sent-bg: #db876a; 
+  --msg-sent-text: #ffffff;
+  --msg-sent-name: #ffd9ba; 
+  --msg-received-bg: var(--card-bg);
+  --msg-name-text: var(--text-main);
+  --msg-name-sent-text: var(--msg-sent-name);
+
+  --card-bg: #ffffff;
+
+  /* Notifications */
+  --notif-hover: rgba(0, 0, 0, 0.1);
+  --notif-highlight: #ac0000;
+
+  --group-button: #e5a485;
+
+  --body-chat: 
+
+}
+
+/* Dark mode */
+body.dark {
+  --bg-1: #241829;
+  --bg-2: #2b2438;
+  --bg-3: #744d30;
+
+  --text-main: #e2dcd3;
+
+  --card-bg: #37382b;
+
+ --friend-card-bg: #20092f;
+
+  /* Sidebar (dark version) */
+  --sidebar-bg: #3c2b23;
+  --sidebar-hover: #5a3d31;
+  --sidebar-text: #b08a6b;
+  --sidbar-title: hsl(27, 39%, 78%);
+  
+
+
+  /* Header */
+  --header-bg: #242044;
+  --header-text: #ffd9ba;
+  --header-border: #1c0802;
+
+  /* Input */
+  --input-bg: #1e1e1e;
+  --input-text: #f5f5f5;
+  --input-border-top: #2a1608;
+
+  --check-gray: #c7bfb4;
+  --check-blue: #4aa2ff;
+
+  /* Message bubble colors (dark mode) */
+  --msg-sent-bg: #7b2e0a;
+  --msg-sent-text: #ffffff;
+  --msg-sent-name: #ffd9ba;
+  --msg-received-bg: var(--card-bg);
+  --msg-name-text: var(--text-main);
+  --msg-name-sent-text: var(--msg-sent-name);
+
+  --notif-hover: rgba(255, 255, 255, 0.07);
+  --notif-highlight: #5d4639;
+  --group-button: #7b2e0a;
+}
+
+/* Stars! */
+.star-field {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  display: none;
+}
+
+body.dark .star-field {
+  display: block;
+}
+
+.star {
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: white;
+  border-radius: 50%;
+  opacity: 0;
+  animation: twinkle 3s infinite ease-in-out;
+}
+
+@keyframes twinkle {
+  0%, 100% {
+    opacity: 0.1;
+    transform: scale(0.7);
   }
+  50% {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+}
