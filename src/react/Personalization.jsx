@@ -28,11 +28,12 @@ export default function Personalization() {
         const urls = await Promise.all(
           res.items.map((itemRef) => getDownloadURL(itemRef))
         );
-        setPresetAvatars(urls);
+        const filteredUrls = urls.filter(url => !url.includes('logo.png'));
+        setPresetAvatars(filteredUrls);
         if (userProfile && userProfile.avatar) {
           setAvatar(userProfile.avatar);
-        } else if (urls.length > 0) {
-          setAvatar(urls[0]); // Set default avatar from storage
+        } else if (filteredUrls.length > 0) {
+          setAvatar(filteredUrls[0]); // Set default avatar from storage
         }
       } catch (error) {
         console.error("Error fetching avatars from storage: ", error);
