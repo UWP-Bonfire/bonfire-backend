@@ -15,31 +15,12 @@ const useAuth = () => {
     const [userProfile, setUserProfile] = useState(null);
     const [loading, setLoading] = useState(true);
 
+    // Effect 1: Listen for auth state changes from Firebase Auth
     useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user && user.emailVerified) {
-                const userRef = doc(firestore, 'users', user.uid);
-                const unsubProfile = onSnapshot(userRef, (docSnap) => {
-                    if (docSnap.exists()) {
-                        setUserProfile(docSnap.data());
-                    } else {
-                        // Handle case where profile doesn't exist, maybe create one
-                        const newProfile = {
-                            email: user.email,
-                            createdAt: serverTimestamp(),
-                            displayName: user.displayName,
-                            avatar: '/images/Logo.png',
-                            bio: 'Welcome to Bonfire!',
-                            bgColor: '#ffd9ba',
-                            usernameColor: '#c84848'
-                        };
-                        setDoc(userRef, newProfile);
-                        setUserProfile(newProfile);
-                    }
-                    setUser(user);
-                    setLoading(false);
-                });
-                return () => unsubProfile();
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setLoading(true);
+            if (currentUser && currentUser.emailVerified) {
+                setUser(currentUser);
             } else {
                 setUser(null);
                 setUserProfile(null);
@@ -50,8 +31,40 @@ const useAuth = () => {
         return () => unsubscribe();
     }, []);
 
+    // Effect 2: Listen for our user object and fetch/create the Firestore profile
+    useEffect(() => {
+        if (user) {
+            const userRef = doc(firestore, 'users', user.uid);
+            const unsubscribeProfile = onSnapshot(userRef, (docSnap) => {
+                if (docSnap.exists()) {
+                    setUserProfile(docSnap.data());
+                } else {
+                    const newProfile = {
+                        email: user.email,
+                        createdAt: serverTimestamp(),
+                        displayName: user.displayName,
+                        avatar: 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a',
+                        bio: 'Welcome to Bonfire!',
+                        bgColor: '#ffd9ba',
+                        usernameColor: '#c84848'
+                    };
+                    setDoc(userRef, newProfile);
+                    setUserProfile(newProfile);
+                }
+                setLoading(false);
+            }, (error) => {
+                console.error("Error fetching user profile:", error);
+                setUserProfile(null);
+                setLoading(false);
+            });
+
+            return () => unsubscribeProfile();
+        }
+    }, [user]); // This effect now correctly depends on the user state
+
     return { user, userProfile, loading };
 };
+
 
 const useAuthentication = () => {
     const [error, setError] = useState('');

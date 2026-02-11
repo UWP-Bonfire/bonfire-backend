@@ -1,6 +1,7 @@
 body {
   margin: 0;
   font-family: "Jeju Hallasan", sans-serif;
+  overflow: hidden;
 }
 
 .welcome-container {
@@ -8,17 +9,22 @@ body {
   align-items: center;
   justify-content: center;
   height: 100vh;
+
+  /* Uses global gradient vars */
   background: linear-gradient(
     180deg,
-    rgba(231, 197, 134, 0.93) 5%,
-    #db976a 48%,
-    rgba(200, 72, 72, 0.67) 89%
+    var(--bg-1) 5%,
+    var(--bg-2) 48%,
+    var(--bg-3) 89%
   );
+  position: relative;
 }
 
 .welcome-content {
   text-align: center;
-  color: #3c2b23;
+  color: var(--text-main);
+  position: relative;
+  z-index: 3;
 }
 
 .welcome-logo {
@@ -45,24 +51,24 @@ h1 {
   border: none;
   border-radius: 8px;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background 0.3s ease, transform 0.2s ease;
 }
 
-/* Button Colors */
+
+
 .register {
-  background: #f2b48e;
-  color: #3c2b23;
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
+}
+.register:hover {
+  background: var(--btn-secondary-hover);
 }
 
-.register:hover {
-  background: #e09c74;
-}
 
 .login {
-  background: #3c2b23;
-  color: #ffd9ba;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
 }
-
 .login:hover {
-  background: #7a5c4a;
+  background: var(--btn-primary-hover);
 }

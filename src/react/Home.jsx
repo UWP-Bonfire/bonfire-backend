@@ -1,61 +1,52 @@
-
-import React from 'react';
-import '../css/Home.css';
-import { Link } from 'react-router-dom';
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import "../css/welcome.css";
+import "../css/global.css";
 import logo from '../assets/images/Logo.png';
+export default function Welcome() {
+  const navigate = useNavigate();
 
-function Home() {
-    return (
-        <div className="home-container">
-            <header className="header">
-                <nav className="navbar">
-                    <img src={logo} alt="Bonfire Logo" className="logo" />
-                    <Link to="/auth" className="login-button">Login</Link>
-                </nav>
-                <div className="hero-section">
-                    <h1>Welcome to Bonfire</h1>
-                    <p>The future of social messaging is here. Connect with friends, share moments, and build your community.</p>
-                    <Link to="/auth" className="cta-button">Get Started</Link>
-                </div>
-            </header>
+  // Generate stars ONCE
+  useEffect(() => {
+    const container = document.querySelector(".star-field");
+    for (let i = 0; i < 60; i++) {
+      const star = document.createElement("div");
+      star.className = "star";
+      star.style.top = Math.random() * 100 + "%";
+      star.style.left = Math.random() * 100 + "%";
+      star.style.animationDelay = Math.random() * 2 + "s";
+      container.appendChild(star);
+    }
+  }, []);
 
-            <main className="main-content">
-                <section className="features-section">
-                    <div className="feature-card">
-                        <div className="feature-icon">💬</div>
-                        <h2>Real-time Messaging</h2>
-                        <p>Experience seamless, real-time conversations with friends and groups. No delays, just instant connection.</p>
-                    </div>
+  // Toggle dark mode
+  const toggleDark = () => {
+    document.body.classList.toggle("dark");
+  };
 
-                    <div className="feature-card">
-                        <div className="feature-icon">👥</div>
-                        <h2>Add Friends</h2>
-                        <p>Easily find and connect with your friends. Build your social circle and stay in touch with those who matter most.</p>
-                    </div>
+  return (
+    <div className="welcome-container">
+      {/* Star layer */}
+      <div className="star-field"></div>
 
-                    <div className="feature-card">
-                        <div className="feature-icon">🎨</div>
-                        <h2>Modern Design</h2>
-                        <p>Enjoy a clean, intuitive, and visually appealing interface that makes messaging a pleasure.</p>
-                    </div>
-                </section>
-            </main>
+      <div className="welcome-content">
+        <img src={logo} alt="Bonfire Logo" className="welcome-logo" />
+        <h1>Welcome to Bonfire</h1>
 
-            <footer className="footer">
-                <div className="footer-links">
-                    <a href="#">About</a>
-                    <a href="#">Contact</a>
-                    <a href="#">Terms of Service</a>
-                </div>
-                <div className="social-media">
-                    <a href="#"><i className="fab fa-twitter"></i></a>
-                    <a href="#"><i className="fab fa-facebook"></i></a>
-                    <a href="#"><i className="fab fa-instagram"></i></a>
-                </div>
-                <p>&copy; 2024 Bonfire. All rights reserved.</p>
-            </footer>
+        {/* DARK MODE BUTTON */}
+        <button className="welcome-btn login" onClick={toggleDark}>
+          🌙 Toggle Dark Mode
+        </button>
+
+        <div className="button-group">
+          <button className="welcome-btn register" onClick={() => navigate("/signUp")}>
+            Register
+          </button>
+          <button className="welcome-btn login" onClick={() => navigate("/auth")}>
+            Sign In
+          </button>
         </div>
-    );
+      </div>
+    </div>
+  );
 }
-
-export default Home;

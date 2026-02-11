@@ -4,22 +4,27 @@ body {
   background: #fff;
 }
 
+/* ---------------------------------------------------
+   Container Layout
+--------------------------------------------------- */
 .container {
   display: flex;
   height: 100vh;
   overflow: hidden;
 }
 
-/* Sidebar (Direct Messages Only) */
+/* ---------------------------------------------------
+   SIDEBAR (theme-variable driven)
+--------------------------------------------------- */
 .sidebar {
   width: 220px;
-  background: rgba(167, 101, 84, 0.9);
+  background: var(--sidebar-bg);
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
   padding: 15px;
-  color: #ffd9ba;
+  color: var(--sidebar-text);
   flex-shrink: 0;
 }
 
@@ -27,6 +32,7 @@ body {
   text-align: center;
   margin: 0 0 15px;
   font-size: 20px;
+  color: var(--sidbar-title);
 }
 
 .dm-list {
@@ -37,6 +43,9 @@ body {
   gap: 12px;
 }
 
+/* ---------------------------------------------------
+   DM LIST
+--------------------------------------------------- */
 .dm {
   display: flex;
   align-items: center;
@@ -44,7 +53,7 @@ body {
   cursor: pointer;
   transition: background 0.2s;
   width: 100%;
-  padding: 4px 0px;
+  padding: 4px 8px;
   border-radius: 10px;
 }
 
@@ -56,15 +65,32 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  margin-left: 5px;
 }
 
 .dm span {
   font-size: 16px;
-  color: #fff;
+  color: var(--sidebar-text);
 }
 
-/* Bottom Section (Settings + User) */
+/* Unread dot */
+.unread-dot {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 10px;
+  height: 10px;
+  background-color: var(--check-blue);
+  border-radius: 50%;
+  border: 2px solid var(--card-bg);
+}
+
+.dm.unread {
+  background-color: rgba(255, 0, 0, 0.05);
+}
+
+/* ---------------------------------------------------
+   Bottom Sidebar
+--------------------------------------------------- */
 .bottom-section {
   display: flex;
   flex-direction: column;
@@ -73,11 +99,12 @@ body {
   margin-top: auto;
 }
 
+/* Settings button */
 .settings-btn {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  background: #ffd9ba;
+  background: var(--sidebar-text);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -86,7 +113,7 @@ body {
 }
 
 .settings-btn:hover {
-  background: #7a5c4a;
+  background: var(--sidebar-hover);
 }
 
 .settings-btn img {
@@ -94,15 +121,16 @@ body {
   height: 24px;
 }
 
+/* Current user display */
 .user {
   display: flex;
   align-items: center;
   gap: 10px;
   font-size: 16px;
-  background: #7a5c4a;
+  background: var(--card-bg);
   border-radius: 20px;
   padding: 8px 12px;
-  color: #fff;
+  color: var(--text-main);
 }
 
 .user img {
@@ -111,37 +139,42 @@ body {
   border-radius: 50%;
 }
 
-/* Main Content Area */
+/* ---------------------------------------------------
+   MAIN PAGE (FRIENDS)
+--------------------------------------------------- */
 .main {
   flex: 1;
   display: flex;
   flex-direction: column;
   padding: 20px;
-  overflow: hidden;
+
   background: linear-gradient(
     180deg,
-    rgba(231, 197, 134, 0.93) 5%,
-    #db976a 48%,
-    rgba(200, 72, 72, 0.67) 89%
+    var(--bg-1) 5%,
+    var(--bg-2) 48%,
+    var(--bg-3) 89%
   );
 }
 
-/* Main Header */
+/* ---------------------------------------------------
+   MAIN HEADER
+--------------------------------------------------- */
 .main-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: #83884e;
+  background: var(--header-bg);
   border-radius: 9px;
   padding: 12px 20px;
-  color: #ffd9ba;
+  color: var(--header-text);
 }
 
+/* Add friend button */
 .add-friend, .sign-out-btn {
   padding: 8px 12px;
   border: none;
   border-radius: 10px;
-  background: #f2b48e;
+  background: var(--accent-1);
   cursor: pointer;
   font-size: 16px;
   font-weight: bold;
@@ -149,50 +182,159 @@ body {
 }
 
 .add-friend:hover, .sign-out-btn:hover {
-  background: #e09c74;
+  background: var(--accent-2);
 }
 
-.notification-container {
+/* ---------------------------------------------------
+   Friends List
+--------------------------------------------------- */
+.friends-container {
+  flex: 1;
+  margin-top: 20px;
+  overflow-y: auto;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow-x: visible;
+}
+
+.friend-card {
+  background-color: var(--friend-cad-bg) ;
+  border-radius: 8px;
+  width: 95%;
+  padding: 50px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: transform 0.15s ease-in-out;
   position: relative;
+  z-index: 1;
 }
 
-.notification-bell {
+.friend-card:hover {
+  transform: translateY(-2px);
+  z-index: 1000;
+}
+
+.friend-card img {
+  width: 85px;
+  height: 85px;
+  border-radius: 50%;
+}
+
+.friend-card span {
+  flex: 1;
+  font-size: 22px;
+  color: var(--text-main);
+  margin-left: 10px;
+}
+
+/* ---------------------------------------------------
+   BUTTONS ON FRIEND CARDS
+--------------------------------------------------- */
+.chat-btn,
+.options-btn {
+  border: none;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  cursor: pointer;
+  background: var(--card-bg);
+  margin-left: 6px;
+  font-size: 20px;
+  transition: background 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chat-btn:hover,
+.options-btn:hover {
+  background: var(--notif-hover);
+}
+
+.chat-btn img,
+.options-btn img {
   width: 24px;
   height: 24px;
-  margin-right: 10px;
+}
+
+/* ---------------------------------------------------
+   Notification Icon
+--------------------------------------------------- */
+.header-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.notif-btn {
+  background: none;
+  border: none;
   cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  transition: background-color 0.3s ease;
+}
+
+.notif-btn:hover {
+  background-color: var(--notif-hover);
+}
+
+.notif-btn img {
+  width: 24px;
+  height: 24px;
+}
+
+/* Red notification dot */
+.notif-dot {
+  position: absolute;
+  top: 4px;
+  right: 6px;
+  width: 10px;
+  height: 10px;
+  background-color: var(--check-blue);
+  border-radius: 50%;
+  border: 2px solid var(--card-bg);
+}
+
+/* Dropdown menu */
+.notif-container {
+  position: relative;
 }
 
 .notification-popup {
   position: absolute;
-  top: 100%;
-  right: 0;
+  top: 100px;
+  right: 10px;
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
   width: 300px;
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  z-index: 1000;
-  padding: 0;
-  overflow: hidden;
+  padding: 15px;
+  z-index: 100;
+  animation: fadeIn 0.25s ease;
 }
 
 .notification-popup p {
-  padding: 15px;
-  font-size: 16px;
-  font-weight: bold;
-  text-align: center;
+  margin: 0 0 10px;
   color: #333;
-  margin: 0;
-  border-bottom: 1px solid #ddd;
+  font-size: 1.1rem;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 10px;
+  font-weight: bold;
 }
 
 .notification-item {
   display: flex;
   align-items: center;
-  padding: 10px;
-  border-bottom: 1px solid #ddd;
-  transition: background-color 0.2s;
+  padding: 10px 6px;
+  font-size: 0.95rem;
+  color: #333;
+  border-radius: 6px;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
 }
 
 .notification-item:hover {
@@ -203,111 +345,109 @@ body {
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  margin-right: 15px;
+  margin-right: 12px;
 }
 
 .notification-item span {
-  font-size: 14px;
-  color: #333;
+    flex: 1;
 }
 
+.notification-item .actions {
+    margin-left: 10px;
+    display: flex;
+    gap: 5px;
+}
 
-/* Friends List */
-.friends-container {
-  flex: 1;
-  margin-top: 20px;
-  overflow-y: auto;
-  align-items: center;
+.notification-item .actions button {
+    border: none;
+    border-radius: 5px;
+    padding: 6px 12px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: white;
+    transition: opacity 0.2s ease;
+}
+
+.notification-item .actions button:hover {
+    opacity: 0.85;
+}
+
+.notification-item .actions .accept-btn {
+    background-color: #4CAF50; /* Green */
+}
+
+.notification-item .actions .decline-btn {
+    background-color: #f44336; /* Red */
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ---------------------------------------------------
+   FRIEND CARD OPTIONS MENU
+--------------------------------------------------- */
+.options-wrapper {
+  position: relative;
+  display: inline-block;
+  z-index: 1500;
+}
+
+.context-menu {
+  position: absolute;
+  right: 0;
+  background: var(--card-bg);
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  min-width: 160px;
+  z-index: 9999;
+  pointer-events: auto;
+  top: 42px;
+  opacity: 0;
+  transform: translateY(-5px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
 }
 
-.friend-card {
-  background-color: #d3d3d3;
-  border-radius: 8px;
-  width: 95%;
-  padding: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  transition: transform 0.15s ease-in-out;
+.options-wrapper:hover .context-menu {
+  opacity: 1;
+  transform: translateY(0);
 }
 
-.friend-card:hover {
-  transform: translateY(-2px);
-}
-
-.friend-card img {
-  width: 85px;
-  height: 85px;
-  border-radius: 50%;
-  margin-right: 20px;
-}
-
-.friend-info {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-.friend-info .friend-name {
-  font-size: 22px;
-  color: #333;
-}
-
-.friend-actions {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-/* Buttons on friend cards */
-.chat-btn,
-.options-btn {
+.menu-item {
+  background: none;
   border: none;
-  border-radius: 50%;
-  width: 42px;
-  height: 42px;
+  text-align: left;
+  padding: 10px 15px;
+  font-size: 0.95rem;
+  color: var(--text-main);
   cursor: pointer;
-  background: #fff;
-  font-size: 20px;
-  transition: background 0.2s;
+  transition: background-color 0.2s ease;
 }
 
-.chat-btn img{
-  width: 20px;
-  height: 20px;
-  margin-left: 5px;
-  
+.menu-item:hover {
+  background-color: var(--notif-highlight);
 }
 
-.options-btn {
-  background: #fff;
+.menu-item.danger {
+  color: #c84848;
 }
 
-.chat-btn:hover,
-.options-btn:hover {
-  background: #ccc;
+.menu-item.danger:hover {
+  background-color: #f4b4b4;
 }
 
-.unread-count {
-    background-color: #c84848;
-    color: white;
-    border-radius: 50%;
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    font-weight: bold;
-    margin-right: 10px;
-}
-
-.no-friends-message {
-    text-align: center;
-    margin-top: 50px;
-    color: #666;
+.context-menu hr {
+  border: none;
+  border-top: 1px solid var(--notif-highlight);
+  margin: 5px 0;
+  height: 0;
 }
