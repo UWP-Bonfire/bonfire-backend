@@ -53,23 +53,42 @@ const useFriends = () => {
     }, [user]);
 
     const unfriend = async (friendId) => {
-        if (!user) return;
+        if (!user) {
+            setError("You must be logged in to unfriend a user.");
+            return;
+        }
 
         try {
+            // 1. Remove friend from both users' friend lists
             const userDocRef = doc(firestore, 'users', user.uid);
-            const friendDocRef = doc(firestore, 'users', friendId);
-
             await updateDoc(userDocRef, {
                 friends: arrayRemove(friendId)
             });
 
+            const friendDocRef = doc(firestore, 'users', friendId);
             await updateDoc(friendDocRef, {
                 friends: arrayRemove(user.uid)
             });
 
+            // 2. Delete the chat history
+            const chatId = [user.uid, friendId].sort().join('_');
+            const chatDocRef = doc(firestore, 'chats', chatId);
+            const messagesCollectionRef = collection(chatDocRef, 'messages');
+
+            // Get all messages and delete them
+            const messagesSnapshot = await getDocs(messagesCollectionRef);
+            const deletePromises = messagesSnapshot.docs.map(doc => deleteDoc(doc.ref));
+            await Promise.all(deletePromises);
+
+            // Delete the chat document itself
+            await deleteDoc(chatDocRef);
+
+            // 3. Update local state to remove the friend from the UI
+            setFriends(prevFriends => prevFriends.filter(friend => friend.id !== friendId));
+
         } catch (err) {
             console.error("Error unfriending user: ", err);
-            setError("Error unfriending user.");
+            setError("Failed to unfriend user. Please try again.");
         }
     };
 

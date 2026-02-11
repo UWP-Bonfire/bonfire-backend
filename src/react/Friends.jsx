@@ -29,15 +29,17 @@ export default function Friends() {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (menuRef.current && !menuRef.current.contains(event.target)) {
-        setActiveOptionsMenu(null);
-      }
+      if (activeOptionsMenu && menuRef.current && !menuRef.current.contains(event.target)) {
+        if (!event.target.closest('.options-btn')) {
+            setActiveOptionsMenu(null);
+        }
+    }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, []);
+  }, [activeOptionsMenu]);
 
 
   useEffect(() => {
@@ -96,8 +98,8 @@ export default function Friends() {
     };
   }, [friends, user]);
 
-  const handleChatClick = () => {
-    navigate(`/app/chat`);
+  const handleChatClick = (friendId) => {
+    navigate(`/app/chat/${friendId}`);
   };
 
   const handleSignOut = () => {
@@ -233,10 +235,10 @@ export default function Friends() {
                             <button className="chat-btn" onClick={() => handleChatClick(friend.id)}>
                               <img src={messageIcon} alt="Chat" />
                             </button>
-                            <div className="options-menu-container" ref={menuRef}>
+                            <div className="options-menu-container">
                               <button className="options-btn" onClick={() => toggleOptionsMenu(friend.id)}>⋮</button>
                               {activeOptionsMenu === friend.id && (
-                                <div className="options-menu">
+                                <div className="options-menu" ref={menuRef}>
                                   <div className="options-menu-item" onClick={() => handleUnfriend(friend.id)}>Unfriend</div>
                                   <div className="options-menu-item" onClick={() => handleMuteToggle(friend)}>
                                     {friend.isMuted ? 'Unmute' : 'Mute'}
