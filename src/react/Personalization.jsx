@@ -5,60 +5,51 @@ import {
   getFirestore,
   setDoc,
 } from "firebase/firestore";
+import { getStorage, ref, listAll, getDownloadURL } from "firebase/storage";
 import { useAuth } from "./hooks/useAuth";
 import "../css/personalization.css";
-import icon1 from "../assets/icons/icon1.png";
-import icon2 from "../assets/icons/icon2.png";
-import icon3 from "../assets/icons/icon3.png";
-import icon4 from "../assets/icons/icon4.png";
-import icon5 from "../assets/icons/icon5.png";
-import icon6 from "../assets/icons/icon6.png";
-import icon7 from "../assets/icons/icon7.png";
-import icon8 from "../assets/icons/icon8.png";
-import icon9 from "../assets/icons/icon9.png";
-import icon10 from "../assets/icons/icon10.png";
-import icon11 from "../assets/icons/icon11.png";
-import icon12 from "../assets/icons/icon12.png";
-import icon13 from "../assets/icons/icon13.png";
-import icon14 from "../assets/icons/icon14.png";
-import icon15 from "../assets/icons/icon15.png";
 
 export default function Personalization() {
   const navigate = useNavigate();
   const { user, userProfile, loading } = useAuth();
   const [displayName, setDisplayName] = useState("");
   const [bio, setBio] = useState("");
-  const [avatar, setAvatar] = useState(icon1); // Initialize with a default value
+  const [avatar, setAvatar] = useState(null); // Initialize with null
   const [usernameColor, setUsernameColor] = useState("");
   const [bgColor, setBgColor] = useState("");
+  const [presetAvatars, setPresetAvatars] = useState([]);
+
+  useEffect(() => {
+    const fetchAvatars = async () => {
+      const storage = getStorage();
+      const avatarsRef = ref(storage, 'Profile_Pictures');
+      try {
+        const res = await listAll(avatarsRef);
+        const urls = await Promise.all(
+          res.items.map((itemRef) => getDownloadURL(itemRef))
+        );
+        setPresetAvatars(urls);
+        if (userProfile && userProfile.avatar) {
+          setAvatar(userProfile.avatar);
+        } else if (urls.length > 0) {
+          setAvatar(urls[0]); // Set default avatar from storage
+        }
+      } catch (error) {
+        console.error("Error fetching avatars from storage: ", error);
+      }
+    };
+
+    fetchAvatars();
+  }, [userProfile]);
 
   useEffect(() => {
     if (userProfile) {
       setDisplayName(userProfile.displayName || "User12");
       setBio(userProfile.bio || "Welcome to Bonfire!");
-      setAvatar(userProfile.avatar || icon1);
       setUsernameColor(userProfile.usernameColor || "#c84848");
       setBgColor(userProfile.bgColor || "#ffd9ba");
     }
   }, [userProfile]);
-
-  const presetAvatars = [
-    icon1,
-    icon2,
-    icon3,
-    icon4,
-    icon5,
-    icon6,
-    icon7,
-    icon8,
-    icon9,
-    icon10,
-    icon11,
-    icon12,
-    icon13,
-    icon14,
-    icon15,
-  ];
 
   const handleSave = async () => {
     if (!user) return;
@@ -96,7 +87,7 @@ export default function Personalization() {
 
       {/* Live Preview */}
       <div className="top-preview-card" style={{ backgroundColor: bgColor }}>
-        <img src={avatar} alt="Avatar" className="top-avatar" />
+        {avatar && <img src={avatar} alt="Avatar" className="top-avatar" />}
         <h3 style={{ color: usernameColor }}>{displayName}</h3>
         <p>{bio}</p>
       </div>
