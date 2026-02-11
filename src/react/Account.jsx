@@ -18,7 +18,7 @@ export default function Account() {
   // Use Firestore data from userProfile with fallbacks
   const displayName = userProfile.displayName || "User12";
   const bio = userProfile.bio || "Welcome to Bonfire!";
-  const avatar = userProfile.avatar || "/images/icon1.png";
+  const avatar = userProfile.avatar || "https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a";
   const usernameColor = userProfile.usernameColor || "#c84848";
   const bgColor = userProfile.bgColor || "#ffd9ba";
 

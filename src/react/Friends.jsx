@@ -154,7 +154,7 @@ export default function Friends() {
               key={friend.id}
               onClick={() => handleChatClick(friend.id)}
             >
-              <img src={friend.avatar || '/images/Default PFP.jpg'} alt={friend.name} />
+              <img src={friend.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'} alt={friend.name} />
               <span>{friend.name}</span>
               {unreadCounts[friend.id] > 0 && (
                 <span className="unread-count">{unreadCounts[friend.id]}</span>
@@ -169,7 +169,7 @@ export default function Friends() {
           </div>
           {user && userProfile && (
             <div className="user" onClick={() => navigate("/app/account")}>
-              <img src={userProfile.avatar || '/images/Default PFP.jpg'} alt="User" />
+              <img src={userProfile.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'} alt="User" />
               <span>{user.displayName}</span>
             </div>
           )}
@@ -193,7 +193,7 @@ export default function Friends() {
                 {notifications.length > 0 ? (
                   notifications.map(notif => (
                     <div key={notif.id} className="notification-item">
-                      <img src={notif.avatar || '/images/Default PFP.jpg'} alt="avatar" />
+                      <img src={notif.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'} alt="avatar" />
                       <span>{notif.title}</span>
                       {notif.type === 'friendRequest' && (
                         <div className="notification-actions">
@@ -222,7 +222,7 @@ export default function Friends() {
             ) : (
                 friends.map((friend) => (
                     <div className="friend-card" key={friend.id}>
-                        <img src={friend.avatar || '/images/Default PFP.jpg'} alt={friend.name} />
+                        <img src={friend.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'} alt={friend.name} />
                         <div className="friend-info">
                             <span className="friend-name">{friend.name}</span>
                             {unreadCounts[friend.id] > 0 && (

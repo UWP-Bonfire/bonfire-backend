@@ -98,7 +98,7 @@ const GlobalNotificationListener = () => {
                         `New message from ${friend.name || 'Someone'}`,
                         {
                             body: newMessagesFromFriend[newMessagesFromFriend.length - 1].text,
-                            icon: friend.avatar || '/images/Default PFP.jpg'
+                            icon: friend.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'
                         }
                     );
                     notifiedUsersRef.current.add(friend.id);

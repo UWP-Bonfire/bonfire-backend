@@ -43,7 +43,7 @@ const useAuth = () => {
                         email: user.email,
                         createdAt: serverTimestamp(),
                         displayName: user.displayName,
-                        avatar: '/assets/icons/Default PFP.jpg',
+                        avatar: 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a',
                         bio: 'Welcome to Bonfire!',
                         bgColor: '#ffd9ba',
                         usernameColor: '#c84848'

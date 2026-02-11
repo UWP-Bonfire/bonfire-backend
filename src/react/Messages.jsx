@@ -47,7 +47,7 @@ const MessageRow = ({ message, user, userProfiles, isLast, isGlobalChat }) => {
     return (
         <div className={`message-row ${isSent ? "sent" : "received"}`}>
             <img
-                src={userProfiles[message.senderId]?.avatar || '/images/Default PFP.jpg'}
+                src={userProfiles[message.senderId]?.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'}
                 alt={userProfiles[message.senderId]?.name || 'Anonymous'}
                 className="msg-avatar"
             />
@@ -138,7 +138,7 @@ export default function Messages() {
       <>
         <div className="chat-header">
           <img
-            src={friend.avatar || '/images/Default PFP.jpg'}
+            src={friend.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'}
             alt={friend.name}
             className="chat-header-avatar"
           />
@@ -188,7 +188,7 @@ export default function Messages() {
                   key={friend.id}
                   onClick={() => handleFriendClick(friend)}
                 >
-                  <img src={friend.avatar || '/images/Default PFP.jpg'} alt={friend.name} />
+                  <img src={friend.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'} alt={friend.name} />
                   <span>{friend.name}</span>
                   {unreadCounts[friend.id] > 0 && !friend.isMuted && (
                     <span className="unread-count">{unreadCounts[friend.id]}</span>
