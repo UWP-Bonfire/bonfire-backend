@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "./hooks/useAuth";
 import useChat from "./hooks/useChat";
 import useFriends from "./hooks/useFriends";
@@ -69,10 +69,22 @@ const MessageRow = ({ message, user, userProfiles, isLast, isGlobalChat }) => {
 
 export default function Messages() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuth();
   const { friends, loading: friendsLoading } = useFriends();
   const [selectedFriend, setSelectedFriend] = useState(null);
   const [unreadCounts, setUnreadCounts] = useState({});
+
+  useEffect(() => {
+    const friendId = location.state?.friendId;
+    if (friendId && friends.length > 0) {
+        const friendToSelect = friends.find(f => f.id === friendId);
+        if (friendToSelect) {
+            setSelectedFriend(friendToSelect);
+            navigate(location.pathname, { replace: true, state: {} });
+        }
+    }
+  }, [location.state, friends, navigate]);
 
   useEffect(() => {
     if (!user || friends.length === 0) {
