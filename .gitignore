@@ -2,4 +2,3 @@ serviceAccountKey.json
 node_modules
 firebase-debug.log
 firebase.js
-deploy.yml
