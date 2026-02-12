@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import useChat from './hooks/useChat';
 import '../css/chat.css';
@@ -46,6 +46,16 @@ function Chat() {
     const friendId = queryParams.get('friendId');
     const { messages, loading, sendMessage, userProfiles } = useChat(friendId);
     const messagesEndRef = useRef(null);
+    const { openFriendId } = useParams();
+
+    useEffect(() => {
+      if (openFriendId && friends.length > 0) {
+        const friend = friends.find(f => f.id === openFriendId);
+        if (friend) {
+          setSelectedFriend(friend);
+        }
+      }
+    }, [openFriendId, friends]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
