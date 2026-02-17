@@ -12,6 +12,9 @@ import {
     where,
     doc,
     updateDoc,
+    getDoc,
+    setDoc,
+    increment,
 } from 'firebase/firestore';
 
 const useChat = (friendId) => {
@@ -86,21 +89,51 @@ const useChat = (friendId) => {
 
     const sendMessage = useCallback(async (text) => {
         if (text.trim() === "" || !user || !userProfile || !friendId) return;
-
+    
         const isGlobalChat = friendId === 'global';
         const messagesPath = isGlobalChat ? 'messages' : `chats/${getChatId(user.uid, friendId)}/messages`;
-        
         const messagesRef = collection(firestore, messagesPath);
-
+    
         try {
-            await addDoc(messagesRef, {
+            let messagePayload = {
                 text,
                 timestamp: serverTimestamp(),
                 senderId: user.uid,
                 displayName: userProfile.name || 'Anonymous',
                 photoURL: userProfile.avatar,
                 read: false,
-            });
+            };
+    
+            if (!isGlobalChat) {
+                const chatId = getChatId(user.uid, friendId);
+                const chatRef = doc(firestore, 'chats', chatId);
+                const chatSnap = await getDoc(chatRef);
+                let chatData;
+    
+                if (!chatSnap.exists()) {
+                    chatData = {
+                        limitNotifications: false,
+                        consecutiveUnread: { [user.uid]: 0, [friendId]: 0 },
+                        users: [user.uid, friendId],
+                    };
+                    await setDoc(chatRef, chatData);
+                } else {
+                    chatData = chatSnap.data();
+                }
+    
+                if (chatData.limitNotifications) {
+                    if (chatData.consecutiveUnread[friendId] >= 3) {
+                        messagePayload.isSilent = true;
+                    }
+                    await updateDoc(chatRef, {
+                        [`consecutiveUnread.${friendId}`]: increment(1),
+                        [`consecutiveUnread.${user.uid}`]: 0
+                    });
+                }
+            }
+            
+            await addDoc(messagesRef, messagePayload);
+    
         } catch (err) {
             console.error("Error sending message: ", err);
         }

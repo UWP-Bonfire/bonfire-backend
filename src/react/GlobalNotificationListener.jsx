@@ -4,7 +4,7 @@ import useFriends from './hooks/useFriends';
 import useFavicon from './hooks/useFavicon';
 import useNotifications from './hooks/useNotifications';
 import { firestore } from '../firebase';
-import { collection, query, where, onSnapshot, orderBy } from 'firebase/firestore';
+import { collection, query, where, onSnapshot, orderBy, doc } from 'firebase/firestore';
 
 const GlobalNotificationListener = () => {
     const { user } = useAuth();
@@ -12,6 +12,7 @@ const GlobalNotificationListener = () => {
     const { updateFavicon } = useFavicon('/images/Logo.png');
     const { showNotification } = useNotifications();
     const [unreadCounts, setUnreadCounts] = useState({});
+    const [chatLimits, setChatLimits] = useState({});
 
     const getChatId = (uid1, uid2) => {
         return [uid1, uid2].sort().join('_');
@@ -37,6 +38,20 @@ const GlobalNotificationListener = () => {
     }, [user, notifiedUsersKey, lastTimestampKey]);
 
     useEffect(() => {
+        if (!user || friends.length === 0) return;
+
+        const unsubscribes = friends.map(friend => {
+            const chatId = getChatId(user.uid, friend.id);
+            const chatRef = doc(firestore, 'chats', chatId);
+            return onSnapshot(chatRef, (doc) => {
+                setChatLimits(prev => ({ ...prev, [friend.id]: doc.data()?.limitNotifications }));
+            });
+        });
+
+        return () => unsubscribes.forEach(unsub => unsub());
+    }, [friends, user]);
+
+    useEffect(() => {
         if (!user || friends.length === 0) {
             updateFavicon(0);
             return;
@@ -57,15 +72,25 @@ const GlobalNotificationListener = () => {
             const q = query(messagesRef, where('read', '==', false), where('senderId', '==', friend.id));
 
             return onSnapshot(q, snapshot => {
+                const limitActive = chatLimits[friend.id];
+                let displayCount;
+
+                if (limitActive) {
+                    const unreadNonSilentCount = snapshot.docs.filter(doc => !doc.data().isSilent).length;
+                    displayCount = Math.min(unreadNonSilentCount, 3);
+                } else {
+                    displayCount = snapshot.size;
+                }
+
                 setUnreadCounts(prevCounts => ({
                     ...prevCounts,
-                    [friend.id]: snapshot.size,
+                    [friend.id]: displayCount,
                 }));
             });
         });
 
         return () => unsubscribes.forEach(unsub => unsub());
-    }, [friends, user]);
+    }, [friends, user, chatLimits]);
 
     useEffect(() => {
         if (!user || friends.length === 0) {
@@ -87,7 +112,7 @@ const GlobalNotificationListener = () => {
                 snapshot.docChanges().forEach(change => {
                     if (change.type === 'added' && !change.doc.metadata.hasPendingWrites) {
                         const message = change.doc.data();
-                        if (message.senderId === friend.id) {
+                        if (message.senderId === friend.id && message.isSilent !== true) {
                             newMessagesFromFriend.push(message);
                         }
                     }
