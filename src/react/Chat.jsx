@@ -1,8 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import useChat from './hooks/useChat';
 import '../css/chat.css';
+import { firestore } from '../../firebase';
+import { doc, updateDoc } from 'firebase/firestore';
 
 const Message = ({ message, isSent, userProfile }) => (
     <div className={`message ${isSent ? 'sent' : 'received'}`}>
@@ -46,16 +48,28 @@ function Chat() {
     const friendId = queryParams.get('friendId');
     const { messages, loading, sendMessage, userProfiles } = useChat(friendId);
     const messagesEndRef = useRef(null);
-    const { openFriendId } = useParams();
 
     useEffect(() => {
-      if (openFriendId && friends.length > 0) {
-        const friend = friends.find(f => f.id === openFriendId);
-        if (friend) {
-          setSelectedFriend(friend);
-        }
-      }
-    }, [openFriendId, friends]);
+        if (!user || !friendId || friendId === 'global') return;
+
+        const getChatId = (uid1, uid2) => {
+            return [uid1, uid2].sort().join('_');
+        };
+
+        const resetCounter = async () => {
+            const chatId = getChatId(user.uid, friendId);
+            const chatRef = doc(firestore, 'chats', chatId);
+            try {
+                await updateDoc(chatRef, {
+                    [`consecutiveUnread.${user.uid}`]: 0
+                });
+            } catch (err) {
+                console.log("Could not reset counter. This can happen if the chat document hasn't been created yet.", err);
+            }
+        };
+
+        resetCounter();
+    }, [user, friendId]);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });

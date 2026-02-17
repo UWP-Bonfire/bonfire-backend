@@ -36,10 +36,22 @@ This document outlines the features and implementation details of the current ap
         - `src/react/Messages.jsx`: Updated to fetch and display the unread count in the direct messages sidebar.
     - **Styling:** Added a new `.unread-count` CSS class to `src/css/friends.css` and `src/css/messages.css` to style the notification bubble.
 
-## Current Task: Implement Read Receipts
+### Read Receipts
 
-- **Data Structure:** Add a `read` field to each message in Firestore.
+- **Data Structure:** Added a `read` field to each message in Firestore.
 - **Message Logic:**
-    - When a message is sent, the `read` field will be set to `false`.
-    - When a message is read by the recipient, the `read` field will be updated to `true`.
-- **UI:** Display a visual indicator for read and unread messages.
+    - When a message is sent, the `read` field is set to `false`.
+    - When a message is read by the recipient, the `read` field is updated to `true`.
+- **UI:** A visual indicator for read and unread messages is displayed.
+
+## Current Task: Implement Notification Limit
+
+- **Functionality:** This feature will limit the number of notifications sent to a user for consecutive unread messages in a chat.
+- **Data Structure:**
+    - A `limitNotifications` flag will be added to each chat document in Firestore, defaulting to `false`.
+    - A `consecutiveUnread` object will be added to each chat document, mapping each user's ID to their unread message count.
+- **Logic:**
+    - When a message is sent and `limitNotifications` is `true`, the recipient's `consecutiveUnread` counter will be incremented, and the sender's will be reset to `0`.
+    - If the recipient's `consecutiveUnread` counter reaches 3, subsequent messages will be sent with an `isSilent: true` flag, and no notification will be triggered.
+    - When a user opens a chat, their `consecutiveUnread` counter will be reset to `0`.
+- **Notification Listener:** The `GlobalNotificationListener` will be updated to ignore messages with the `isSilent: true` flag.

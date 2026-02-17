@@ -9,8 +9,9 @@ import { signOut } from "firebase/auth";
 import FriendRequests from './FriendRequests';
 import { useAuth } from './hooks/useAuth';
 import useNotifications from './hooks/useNotifications';
-import { collection, query, where, onSnapshot } from "firebase/firestore";
+import { collection, query, where, onSnapshot, doc } from "firebase/firestore";
 import useFriendRequests from "./hooks/useFriendRequests";
+import useChatSettings from "./hooks/useChatSettings";
 import settingsIcon from '../assets/Settings.svg';
 import bellIcon from '../assets/Bell.png';
 import messageIcon from '../assets/images/message.png';
@@ -25,6 +26,8 @@ export default function Friends() {
   const { requests: friendRequests, acceptRequest, declineRequest } = useFriendRequests();
   const [notifications, setNotifications] = useState([]);
   const [activeOptionsMenu, setActiveOptionsMenu] = useState(null);
+  const { toggleLimit } = useChatSettings();
+  const [chatLimits, setChatLimits] = useState({});
   const menuRef = useRef(null);
 
   useEffect(() => {
@@ -41,6 +44,19 @@ export default function Friends() {
     };
   }, [activeOptionsMenu]);
 
+  useEffect(() => {
+    if (!user || friends.length === 0) return;
+
+    const unsubscribes = friends.map(friend => {
+        const chatId = [user.uid, friend.id].sort().join('_');
+        const chatRef = doc(firestore, 'chats', chatId);
+        return onSnapshot(chatRef, (doc) => {
+            setChatLimits(prev => ({ ...prev, [friend.id]: doc.data()?.limitNotifications }));
+        });
+    });
+
+    return () => unsubscribes.forEach(unsub => unsub());
+  }, [friends, user]);
 
   useEffect(() => {
     requestPermission();
@@ -73,30 +89,48 @@ export default function Friends() {
     setNotifications([...unreadMessages, ...newFriendRequests]);
 }, [unreadCounts, friendRequests, friends, user]);
 
-  useEffect(() => {
-    if (!user || friends.length === 0) {
+useEffect(() => {
+  if (!user || friends.length === 0) {
       return;
-    }
+  }
 
-    const unsubscribes = friends.map(friend => {
-      if (friend.isMuted) return () => {};
+  const unsubscribes = friends.map(friend => {
+      if (friend.isMuted) {
+          setUnreadCounts(prevCounts => {
+              const newCounts = { ...prevCounts };
+              delete newCounts[friend.id];
+              return newCounts;
+          });
+          return () => {};
+      }
+
       const chatId = [user.uid, friend.id].sort().join('_');
       const messagesRef = collection(firestore, 'chats', chatId, 'messages');
       const q = query(messagesRef, where('read', '==', false), where('senderId', '==', friend.id));
 
       const unsubscribe = onSnapshot(q, snapshot => {
-        setUnreadCounts(prevCounts => ({
-          ...prevCounts,
-          [friend.id]: snapshot.size,
-        }));
+          const limitActive = chatLimits[friend.id];
+          let displayCount;
+
+          if (limitActive) {
+              const unreadNonSilentCount = snapshot.docs.filter(doc => !doc.data().isSilent).length;
+              displayCount = Math.min(unreadNonSilentCount, 3);
+          } else {
+              displayCount = snapshot.size;
+          }
+
+          setUnreadCounts(prevCounts => ({
+              ...prevCounts,
+              [friend.id]: displayCount,
+          }));
       });
       return unsubscribe;
-    });
+  });
 
-    return () => {
+  return () => {
       unsubscribes.forEach(unsub => unsub());
-    };
-  }, [friends, user]);
+  };
+}, [friends, user, chatLimits]);
 
   const handleChatClick = (friendId) => {
     navigate(`/app/chat`, { state: { friendId } });
@@ -132,7 +166,12 @@ export default function Friends() {
       muteUser(friend.id);
     }
     setActiveOptionsMenu(null);
-  }
+  };
+
+  const handleLimitToggle = (friendId) => {
+    toggleLimit(friendId, chatLimits[friendId]);
+    setActiveOptionsMenu(null);
+  };
 
 
   if (loading) {
@@ -242,6 +281,9 @@ export default function Friends() {
                                   <div className="options-menu-item" onClick={() => handleUnfriend(friend.id)}>Unfriend</div>
                                   <div className="options-menu-item" onClick={() => handleMuteToggle(friend)}>
                                     {friend.isMuted ? 'Unmute' : 'Mute'}
+                                  </div>
+                                  <div className="options-menu-item" onClick={() => handleLimitToggle(friend.id)}>
+                                    {chatLimits[friend.id] ? 'Disable Limiting' : 'Limit Notifications'}
                                   </div>
                                 </div>
                               )}
