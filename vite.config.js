@@ -6,6 +6,11 @@ import react from '@vitejs/plugin-react'
 export default defineConfig({
   base: '/bonfire-backend/',
   plugins: [react()],
+  test: {
+    globals: true,
+    environment: 'happy-dom',
+    setupFiles: './src/setupTests.js',
+  },
   server: {
     proxy: {
       '/api': {
