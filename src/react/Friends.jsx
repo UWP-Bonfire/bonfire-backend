@@ -12,6 +12,7 @@ import useNotifications from './hooks/useNotifications';
 import { collection, query, where, onSnapshot, doc } from "firebase/firestore";
 import useFriendRequests from "./hooks/useFriendRequests";
 import useChatSettings from "./hooks/useChatSettings";
+import useBlockUser from "./hooks/useBlockUser";
 import settingsIcon from '../assets/Settings.svg';
 import bellIcon from '../assets/Bell.png';
 import messageIcon from '../assets/images/message.png';
@@ -27,6 +28,7 @@ export default function Friends() {
   const [notifications, setNotifications] = useState([]);
   const [activeOptionsMenu, setActiveOptionsMenu] = useState(null);
   const { toggleLimit } = useChatSettings();
+  const { blockUser, unblockUser, blockedUsers } = useBlockUser();
   const [chatLimits, setChatLimits] = useState({});
   const menuRef = useRef(null);
 
@@ -138,7 +140,7 @@ useEffect(() => {
 
   const handleSignOut = () => {
     signOut(auth).then(() => {
-      navigate('/'); 
+      navigate('/');
     }).catch((error) => {
       console.error("Sign out error:", error);
     });
@@ -173,6 +175,15 @@ useEffect(() => {
     setActiveOptionsMenu(null);
   };
 
+  const handleBlockToggle = (friendId) => {
+    if (blockedUsers.includes(friendId)) {
+      unblockUser(friendId);
+    } else {
+      blockUser(friendId);
+    }
+    setActiveOptionsMenu(null);
+  };
+
 
   if (loading) {
     return <div>Loading friends...</div>;
@@ -182,6 +193,8 @@ useEffect(() => {
     return <div className="error-message">{error}</div>;
   }
 
+  const filteredFriends = friends.filter(friend => !blockedUsers.includes(friend.id));
+
   return (
     <div className="container">
       {/* Sidebar (Direct Messages Only) */}
@@ -189,7 +202,7 @@ useEffect(() => {
         <h2>Direct Messages</h2>
 
         <div className="dm-list">
-          {friends.map((friend) => (
+          {filteredFriends.map((friend) => (
             <div
               className="dm"
               key={friend.id}
@@ -222,7 +235,7 @@ useEffect(() => {
         <div className="main-header">
           <h1>Friends</h1>
           <button onClick={handleAddFriend} className="add-friend">Add Friend</button>
-          <div 
+          <div
             className="notification-container"
             onMouseEnter={() => setShowPopup(true)}
             onMouseLeave={() => setShowPopup(false)}
@@ -252,16 +265,16 @@ useEffect(() => {
           </div>
           <button onClick={handleSignOut} className="sign-out-btn">Sign Out</button>
         </div>
-        
+
         <FriendRequests />
 
         <div className="friends-container">
-          {friends.length === 0 ? (
+          {filteredFriends.length === 0 ? (
                 <div className="no-friends-message">
                     <p>You haven't added any friends yet. Use the "Add Friend" button to connect with others.</p>
                 </div>
             ) : (
-                friends.map((friend) => (
+                filteredFriends.map((friend) => (
                     <div className="friend-card" key={friend.id}>
                         <img src={friend.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'} alt={friend.name} />
                         <div className="friend-info">
@@ -284,6 +297,9 @@ useEffect(() => {
                                   </div>
                                   <div className="options-menu-item" onClick={() => handleLimitToggle(friend.id)}>
                                     {chatLimits[friend.id] ? 'Disable Limiting' : 'Limit Notifications'}
+                                  </div>
+                                  <div className="options-menu-item" onClick={() => handleBlockToggle(friend.id)}>
+                                    {blockedUsers.includes(friend.id) ? 'Unblock' : 'Block'}
                                   </div>
                                 </div>
                               )}

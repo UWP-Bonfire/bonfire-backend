@@ -39,6 +39,7 @@ const useAuth = () => {
                 if (docSnap.exists()) {
                     setUserProfile(docSnap.data());
                 } else {
+                    // This case is a fallback, the profile should be created on signup.
                     const newProfile = {
                         email: user.email,
                         createdAt: serverTimestamp(),
@@ -47,7 +48,8 @@ const useAuth = () => {
                         avatar: 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a',
                         bio: 'Welcome to Bonfire!',
                         bgColor: '#ffd9ba',
-                        usernameColor: '#c84848'
+                        usernameColor: '#c84848',
+                        blockedUsers: []
                     };
                     setDoc(userRef, newProfile);
                     setUserProfile(newProfile);
@@ -109,6 +111,22 @@ const useAuthentication = () => {
             if (userCredential && userCredential.user) {
                 const user = userCredential.user;
                 await updateProfile(user, { displayName: username });
+
+                // Create user profile in Firestore immediately
+                const userRef = doc(firestore, 'users', user.uid);
+                const newProfile = {
+                    email: user.email,
+                    createdAt: serverTimestamp(),
+                    displayName: username,
+                    name: username,
+                    avatar: 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a',
+                    bio: 'Welcome to Bonfire!',
+                    bgColor: '#ffd9ba',
+                    usernameColor: '#c84848',
+                    blockedUsers: []
+                };
+                await setDoc(userRef, newProfile);
+                
                 await sendEmailVerification(user);
                 await signOut(auth);
 

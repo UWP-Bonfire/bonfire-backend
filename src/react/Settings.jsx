@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import '../css/Settings.css';
+import BlockedUsers from './BlockedUsers';
 
 const Settings = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const Settings = () => {
         <span>&larr;</span>
         <span>Back to Friends</span>
       </button>
+      <BlockedUsers />
     </div>
   );
 };

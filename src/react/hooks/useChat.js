@@ -16,9 +16,11 @@ import {
     setDoc,
     increment,
 } from 'firebase/firestore';
+import useBlockUser from './useBlockUser';
 
 const useChat = (friendId) => {
     const { user, userProfile } = useAuth();
+    const { blockedUsers } = useBlockUser();
     const [messages, setMessages] = useState([]);
     const [loading, setLoading] = useState(true);
     const [userProfiles, setUserProfiles] = useState({});
@@ -71,9 +73,10 @@ const useChat = (friendId) => {
 
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
             const allMessages = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            setMessages(allMessages);
+            const filteredMessages = allMessages.filter(msg => !blockedUsers.includes(msg.senderId));
+            setMessages(filteredMessages);
 
-            const uids = [...new Set(allMessages.map(msg => msg.senderId).filter(Boolean))];
+            const uids = [...new Set(filteredMessages.map(msg => msg.senderId).filter(Boolean))];
             if (uids.length > 0) {
                 fetchUserProfiles(uids);
             }
@@ -85,15 +88,19 @@ const useChat = (friendId) => {
         });
 
         return () => unsubscribe();
-    }, [user, friendId, fetchUserProfiles]);
+    }, [user, friendId, fetchUserProfiles, blockedUsers]);
 
     const sendMessage = useCallback(async (text) => {
         if (text.trim() === "" || !user || !userProfile || !friendId) return;
-    
+        if (blockedUsers.includes(friendId)) {
+            console.log("You cannot send messages to a blocked user.");
+            return;
+        }
+
         const isGlobalChat = friendId === 'global';
         const messagesPath = isGlobalChat ? 'messages' : `chats/${getChatId(user.uid, friendId)}/messages`;
         const messagesRef = collection(firestore, messagesPath);
-    
+
         try {
             let messagePayload = {
                 text,
@@ -103,13 +110,13 @@ const useChat = (friendId) => {
                 photoURL: userProfile.avatar,
                 read: false,
             };
-    
+
             if (!isGlobalChat) {
                 const chatId = getChatId(user.uid, friendId);
                 const chatRef = doc(firestore, 'chats', chatId);
                 const chatSnap = await getDoc(chatRef);
                 let chatData;
-    
+
                 if (!chatSnap.exists()) {
                     chatData = {
                         limitNotifications: false,
@@ -120,7 +127,7 @@ const useChat = (friendId) => {
                 } else {
                     chatData = chatSnap.data();
                 }
-    
+
                 if (chatData.limitNotifications) {
                     if (chatData.consecutiveUnread[friendId] >= 3) {
                         messagePayload.isSilent = true;
@@ -133,11 +140,11 @@ const useChat = (friendId) => {
             }
             
             await addDoc(messagesRef, messagePayload);
-    
+
         } catch (err) {
             console.error("Error sending message: ", err);
         }
-    }, [user, userProfile, friendId]);
+    }, [user, userProfile, friendId, blockedUsers]);
 
     const markMessageAsRead = useCallback(async (messageId) => {
         if (!user || !friendId || friendId === 'global') return;
