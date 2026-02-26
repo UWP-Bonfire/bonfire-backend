@@ -8,7 +8,7 @@ import {
     sendEmailVerification,
     signOut
 } from "firebase/auth";
-import { doc, setDoc, getDoc, serverTimestamp, getDocs, collection, query, where, onSnapshot } from 'firebase/firestore';
+import { doc, setDoc, serverTimestamp, getDocs, collection, query, where, onSnapshot } from 'firebase/firestore';
 
 const useAuth = () => {
     const [user, setUser] = useState(null);
