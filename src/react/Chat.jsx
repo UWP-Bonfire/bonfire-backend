@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import useChat from './hooks/useChat';
+import useBlockUser from './hooks/useBlockUser';
 import '../css/chat.css';
 import { firestore } from '../../firebase';
 import { doc, updateDoc } from 'firebase/firestore';
@@ -19,11 +20,12 @@ const Message = ({ message, isSent, userProfile }) => (
     </div>
 );
 
-const MessageInput = ({ onSendMessage }) => {
+const MessageInput = ({ onSendMessage, disabled }) => {
     const [newMessage, setNewMessage] = useState('');
 
     const handleSubmit = (e) => {
         e.preventDefault();
+        if (disabled) return;
         onSendMessage(newMessage);
         setNewMessage('');
     };
@@ -34,9 +36,10 @@ const MessageInput = ({ onSendMessage }) => {
                 type="text"
                 value={newMessage}
                 onChange={(e) => setNewMessage(e.target.value)}
-                placeholder="Type a message..."
+                placeholder={disabled ? "You cannot send messages to a blocked user" : "Type a message..."}
+                disabled={disabled}
             />
-            <button type="submit">Send</button>
+            <button type="submit" disabled={disabled}>Send</button>
         </form>
     );
 };
@@ -47,7 +50,10 @@ function Chat() {
     const queryParams = new URLSearchParams(location.search);
     const friendId = queryParams.get('friendId');
     const { messages, loading, sendMessage, userProfiles } = useChat(friendId);
+    const { blockedUsers, blockUser, unblockUser } = useBlockUser();
     const messagesEndRef = useRef(null);
+
+    const isBlocked = friendId ? blockedUsers.includes(friendId) : false;
 
     useEffect(() => {
         if (!user || !friendId || friendId === 'global') return;
@@ -79,6 +85,16 @@ function Chat() {
         scrollToBottom();
     }, [messages]);
 
+    const handleBlockToggle = () => {
+        if (!friendId || friendId === 'global') return;
+
+        if (isBlocked) {
+            unblockUser(friendId);
+        } else {
+            blockUser(friendId);
+        }
+    };
+
     if (loading && messages.length === 0) {
         return <div>Loading messages...</div>;
     }
@@ -87,6 +103,11 @@ function Chat() {
         <div className="chat-container">
             <div className="chat-header">
                 <h2>{friendId ? `Chat with ${userProfiles[friendId]?.name || '...'}` : 'Global Chat Room'}</h2>
+                {friendId && friendId !== 'global' && (
+                    <button onClick={handleBlockToggle} className="block-button">
+                        {isBlocked ? 'Unblock User' : 'Block User'}
+                    </button>
+                )}
             </div>
             <div className="chat-messages">
                 {messages.map((message) => (
@@ -99,7 +120,7 @@ function Chat() {
                 ))}
                 <div ref={messagesEndRef} />
             </div>
-            <MessageInput onSendMessage={sendMessage} />
+            <MessageInput onSendMessage={sendMessage} disabled={isBlocked} />
         </div>
     );
 }

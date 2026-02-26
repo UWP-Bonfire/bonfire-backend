@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 const useFavicon = (initialFaviconUrl) => {
   const [faviconUrl, setFaviconUrl] = useState(initialFaviconUrl);
@@ -11,10 +11,9 @@ const useFavicon = (initialFaviconUrl) => {
     document.getElementsByTagName('head')[0].appendChild(link);
   }, [faviconUrl]);
 
-  const updateFavicon = (notificationCount) => {
+  const updateFavicon = useCallback((notificationCount) => {
     const canvas = document.createElement('canvas');
     const img = document.createElement('img');
-    const link = document.querySelector("link[rel*='icon']");
     img.src = initialFaviconUrl; // Always start with the base image
     img.onload = () => {
       canvas.width = 32;
@@ -59,7 +58,7 @@ const useFavicon = (initialFaviconUrl) => {
         }
         setFaviconUrl(canvas.toDataURL('image/png'));
     }
-  };
+  }, [initialFaviconUrl]);
 
   return { updateFavicon };
 };

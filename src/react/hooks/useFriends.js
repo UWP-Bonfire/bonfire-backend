@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { firestore } from '../../firebase';
-import { collection, doc, onSnapshot, getDocs, query, where, documentId, updateDoc, arrayRemove, setDoc, deleteDoc, getDoc } from 'firebase/firestore';
+import { collection, doc, onSnapshot, getDocs, query, where, documentId, updateDoc, arrayRemove, setDoc, deleteDoc } from 'firebase/firestore';
 import { useAuth } from './useAuth';
+import useBlockUser from './useBlockUser';
 
 const useFriends = () => {
     const { user } = useAuth();
+    const { blockedUsers } = useBlockUser();
     const [friends, setFriends] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -33,7 +35,8 @@ const useFriends = () => {
                             friend.isMuted = !muteSnapshot.empty;
                             return friend;
                         }));
-                        setFriends(friendsData);
+                        const nonBlockedFriends = friendsData.filter(friend => !blockedUsers.includes(friend.id));
+                        setFriends(nonBlockedFriends);
                     } catch (err) {
                          console.error("Error fetching friends data: ", err);
                          setError("Failed to fetch friends list.");
@@ -50,7 +53,7 @@ const useFriends = () => {
         });
 
         return () => unsubscribe();
-    }, [user]);
+    }, [user, blockedUsers]);
 
     const unfriend = async (friendId) => {
         if (!user) {

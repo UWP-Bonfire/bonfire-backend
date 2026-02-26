@@ -84,7 +84,7 @@ export default function Messages() {
             navigate(location.pathname, { replace: true, state: {} });
         }
     }
-  }, [location.state, friends, navigate]);
+  }, [location.state, friends, navigate, location.pathname]);
 
   useEffect(() => {
     if (!user || friends.length === 0) {
@@ -144,7 +144,7 @@ export default function Messages() {
                 }
             });
         }
-    }, [messages, user.uid, markMessageAsRead]);
+    }, [messages, user, markMessageAsRead]);
 
     return (
       <>

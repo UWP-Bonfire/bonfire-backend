@@ -1,10 +1,15 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useAuth } from './hooks/useAuth';
 import useFriends from './hooks/useFriends';
 import useFavicon from './hooks/useFavicon';
 import useNotifications from './hooks/useNotifications';
 import { firestore } from '../firebase';
 import { collection, query, where, onSnapshot, orderBy, doc } from 'firebase/firestore';
+import isEqual from 'lodash.isequal';
+
+const getChatId = (uid1, uid2) => {
+    return [uid1, uid2].sort().join('_');
+};
 
 const GlobalNotificationListener = () => {
     const { user } = useAuth();
@@ -14,17 +19,13 @@ const GlobalNotificationListener = () => {
     const [unreadCounts, setUnreadCounts] = useState({});
     const [chatLimits, setChatLimits] = useState({});
 
-    const getChatId = (uid1, uid2) => {
-        return [uid1, uid2].sort().join('_');
-    };
-
     const notifiedUsersRef = useRef(new Set());
     const lastTimestampRef = useRef(new Date().toISOString());
-    const notifiedUsersKey = `notifiedUsers_${user?.uid}`;
-    const lastTimestampKey = `lastTimestamp_${user?.uid}`;
+    const notifiedUsersKey = user ? `notifiedUsers_${user.uid}` : null;
+    const lastTimestampKey = user ? `lastTimestamp_${user.uid}` : null;
 
     useEffect(() => {
-        if (!user) return;
+        if (!user || !notifiedUsersKey || !lastTimestampKey) return;
         try {
             const storedNotifiedUsers = JSON.parse(sessionStorage.getItem(notifiedUsersKey) || '[]');
             notifiedUsersRef.current = new Set(storedNotifiedUsers);
@@ -44,7 +45,13 @@ const GlobalNotificationListener = () => {
             const chatId = getChatId(user.uid, friend.id);
             const chatRef = doc(firestore, 'chats', chatId);
             return onSnapshot(chatRef, (doc) => {
-                setChatLimits(prev => ({ ...prev, [friend.id]: doc.data()?.limitNotifications }));
+                const limit = doc.data()?.limitNotifications;
+                setChatLimits(prev => {
+                    if (prev[friend.id] !== limit) {
+                        return { ...prev, [friend.id]: limit };
+                    }
+                    return prev;
+                });
             });
         });
 
@@ -60,9 +67,12 @@ const GlobalNotificationListener = () => {
         const unsubscribes = friends.map(friend => {
             if (friend.isMuted) {
                 setUnreadCounts(prevCounts => {
-                    const newCounts = { ...prevCounts };
-                    delete newCounts[friend.id];
-                    return newCounts;
+                    if (prevCounts[friend.id]) {
+                        const newCounts = { ...prevCounts };
+                        delete newCounts[friend.id];
+                        return newCounts;
+                    }
+                    return prevCounts;
                 });
                 return () => {};
             }
@@ -73,27 +83,26 @@ const GlobalNotificationListener = () => {
 
             return onSnapshot(q, snapshot => {
                 const limitActive = chatLimits[friend.id];
-                let displayCount;
+                let displayCount = limitActive 
+                    ? Math.min(snapshot.docs.filter(doc => !doc.data().isSilent).length, 3)
+                    : snapshot.size;
 
-                if (limitActive) {
-                    const unreadNonSilentCount = snapshot.docs.filter(doc => !doc.data().isSilent).length;
-                    displayCount = Math.min(unreadNonSilentCount, 3);
-                } else {
-                    displayCount = snapshot.size;
-                }
-
-                setUnreadCounts(prevCounts => ({
-                    ...prevCounts,
-                    [friend.id]: displayCount,
-                }));
+                setUnreadCounts(prevCounts => {
+                    if (prevCounts[friend.id] !== displayCount) {
+                        return { ...prevCounts, [friend.id]: displayCount };
+                    }
+                    return prevCounts;
+                });
             });
         });
 
         return () => unsubscribes.forEach(unsub => unsub());
-    }, [friends, user, chatLimits]);
+    }, [friends, user, chatLimits, updateFavicon]);
+
+    const showNotificationCallback = useCallback(showNotification, []);
 
     useEffect(() => {
-        if (!user || friends.length === 0) {
+        if (!user || friends.length === 0 || !notifiedUsersKey || !lastTimestampKey) {
             return;
         }
 
@@ -108,21 +117,16 @@ const GlobalNotificationListener = () => {
             );
 
             return onSnapshot(q, (snapshot) => {
-                const newMessagesFromFriend = [];
-                snapshot.docChanges().forEach(change => {
-                    if (change.type === 'added' && !change.doc.metadata.hasPendingWrites) {
-                        const message = change.doc.data();
-                        if (message.senderId === friend.id && message.isSilent !== true) {
-                            newMessagesFromFriend.push(message);
-                        }
-                    }
-                });
+                const newMessages = snapshot.docChanges()
+                    .filter(change => change.type === 'added' && !change.doc.metadata.hasPendingWrites)
+                    .map(change => change.doc.data())
+                    .filter(message => message.senderId === friend.id && !message.isSilent);
 
-                if (newMessagesFromFriend.length > 0 && !notifiedUsersRef.current.has(friend.id) && !friend.isMuted) {
-                    showNotification(
+                if (newMessages.length > 0 && !notifiedUsersRef.current.has(friend.id)) {
+                    showNotificationCallback(
                         `New message from ${friend.name || 'Someone'}`,
                         {
-                            body: newMessagesFromFriend[newMessagesFromFriend.length - 1].text,
+                            body: newMessages[newMessages.length - 1].text,
                             icon: friend.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'
                         }
                     );
@@ -131,8 +135,7 @@ const GlobalNotificationListener = () => {
                 }
 
                 if (!snapshot.empty) {
-                    const lastDoc = snapshot.docs[snapshot.docs.length - 1];
-                    const newTimestamp = lastDoc.data().timestamp.toDate().toISOString();
+                    const newTimestamp = snapshot.docs[snapshot.docs.length - 1].data().timestamp.toDate().toISOString();
                     if (newTimestamp > lastTimestampRef.current) {
                         lastTimestampRef.current = newTimestamp;
                         sessionStorage.setItem(lastTimestampKey, newTimestamp);
@@ -144,22 +147,19 @@ const GlobalNotificationListener = () => {
         });
 
         return () => unsubscribes.forEach(unsub => unsub());
-    }, [user, friends, showNotification, notifiedUsersKey, lastTimestampKey]);
+    }, [user, friends, showNotificationCallback, notifiedUsersKey, lastTimestampKey]);
 
     useEffect(() => {
-        const mutedFriendIds = new Set(
-            friends.filter(f => f.isMuted).map(f => f.id)
-        );
-    
+        const mutedFriendIds = new Set(friends.filter(f => f.isMuted).map(f => f.id));
         const totalUnread = Object.entries(unreadCounts)
             .filter(([friendId]) => !mutedFriendIds.has(friendId))
             .reduce((sum, [, count]) => sum + count, 0);
     
         updateFavicon(totalUnread);
     
-        if (user) {
+        if (user && notifiedUsersKey) {
             let changed = false;
-            const notifiedUsers = notifiedUsersRef.current;
+            const notifiedUsers = new Set(notifiedUsersRef.current);
             
             Object.entries(unreadCounts).forEach(([friendId, count]) => {
                 if ((count === 0 || mutedFriendIds.has(friendId)) && notifiedUsers.has(friendId)) {
@@ -169,7 +169,10 @@ const GlobalNotificationListener = () => {
             });
     
             if (changed) {
-                sessionStorage.setItem(notifiedUsersKey, JSON.stringify(Array.from(notifiedUsers)));
+                if (!isEqual(notifiedUsers, notifiedUsersRef.current)) {
+                    notifiedUsersRef.current = notifiedUsers;
+                    sessionStorage.setItem(notifiedUsersKey, JSON.stringify(Array.from(notifiedUsers)));
+                }
             }
         }
     }, [unreadCounts, friends, updateFavicon, user, notifiedUsersKey]);
