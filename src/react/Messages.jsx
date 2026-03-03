@@ -9,14 +9,11 @@ import { collection, query, where, onSnapshot } from "firebase/firestore";
 import arrowIcon from "../assets/images/arrow.png";
 import rightArrowIcon from "../assets/images/right-arrow.png";
 
-const MessageInput = ({ onSendMessage }) => {
-    const [newMessage, setNewMessage] = useState('');
-
+const MessageInput = ({ message, setMessage, onSendMessage }) => {
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (newMessage.trim() !== '') {
-            onSendMessage(newMessage);
-            setNewMessage('');
+        if (message.trim() !== '') {
+            onSendMessage(message);
         }
     };
 
@@ -24,8 +21,8 @@ const MessageInput = ({ onSendMessage }) => {
         <form className="chat-input" onSubmit={handleSubmit}>
             <input
                 type="text"
-                value={newMessage}
-                onChange={(e) => setNewMessage(e.target.value)}
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
                 placeholder="Type a message..."
             />
             <button type="submit" className="icon-btn send-btn" aria-label="Send message">
@@ -66,6 +63,70 @@ const MessageRow = ({ message, user, userProfiles, isLast, isGlobalChat }) => {
         </div>
     );
 };
+
+const ChatView = ({ friend, isGlobalChat }) => {
+    const { user } = useAuth();
+    const { messages, loading: messagesLoading, sendMessage, userProfiles, markMessageAsRead } = useChat(friend.id);
+    const messagesEndRef = useRef(null);
+    const [newMessage, setNewMessage] = useState('');
+
+    const handleSendMessage = (message) => {
+        sendMessage(message);
+        setNewMessage('');
+    };
+
+    const scrollToBottom = () => {
+      messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+        if (messages.length > 0) {
+            messages.forEach(message => {
+                if (user && message.senderId !== user.uid && !message.read) {
+                    markMessageAsRead(message.id);
+                }
+            });
+        }
+    }, [messages, user, markMessageAsRead]);
+
+    return (
+      <>
+        <div className="chat-header">
+          <img
+            src={friend.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'}
+            alt={friend.name}
+            className="chat-header-avatar"
+          />
+          <span>Chat with {friend.name}</span>
+        </div>
+        <div className="chat-body">
+          {messagesLoading && messages.length === 0 ? (
+            <div className="loading-messages">Loading messages...</div>
+          ) : (
+            messages.map((message, index) => (
+              <MessageRow
+                key={message.id}
+                message={message}
+                user={user}
+                userProfiles={userProfiles}
+                isLast={index === messages.length - 1}
+                isGlobalChat={isGlobalChat}
+              />
+            ))
+          )}
+          <div ref={messagesEndRef} />
+        </div>
+        <div className="input-box">
+          <MessageInput
+            message={newMessage}
+            setMessage={setNewMessage}
+            onSendMessage={handleSendMessage}
+          />
+        </div>
+      </>
+    );
+  };
 
 export default function Messages() {
   const navigate = useNavigate();
@@ -127,59 +188,6 @@ export default function Messages() {
     setSelectedFriend(friend);
   };
 
-  const ChatView = ({ friend, isGlobalChat }) => {
-    const { messages, loading: messagesLoading, sendMessage, userProfiles, markMessageAsRead } = useChat(friend.id);
-    const messagesEndRef = useRef(null);
-  
-    const scrollToBottom = () => {
-      messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
-    };
-  
-    useEffect(() => {
-        scrollToBottom();
-        if (messages.length > 0) {
-            messages.forEach(message => {
-                if (message.senderId !== user.uid && !message.read) {
-                    markMessageAsRead(message.id);
-                }
-            });
-        }
-    }, [messages, user, markMessageAsRead]);
-
-    return (
-      <>
-        <div className="chat-header">
-          <img
-            src={friend.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'}
-            alt={friend.name}
-            className="chat-header-avatar"
-          />
-          <span>Chat with {friend.name}</span>
-        </div>
-        <div className="chat-body">
-          {messagesLoading && messages.length === 0 ? (
-            <div className="loading-messages">Loading messages...</div>
-          ) : (
-            messages.map((message, index) => (
-              <MessageRow
-                key={message.id}
-                message={message}
-                user={user}
-                userProfiles={userProfiles}
-                isLast={index === messages.length - 1}
-                isGlobalChat={isGlobalChat}
-              />
-            ))
-          )}
-          <div ref={messagesEndRef} />
-        </div>
-        <div className="input-box">
-          <MessageInput onSendMessage={sendMessage} />
-        </div>
-      </>
-    );
-  };
-
   return (
     <div className="messages-container">
       <aside className="sidebar">
@@ -211,7 +219,7 @@ export default function Messages() {
           </div>
         </div>
         <div className="sidebar-bottom-buttons">
-            <button className="create-group" onClick={() => handleFriendClick({ id: 'global', name: 'Global Chat', avatar: '/images/icon11.png' })}>
+            <button className="create-group" onClick={() => handleFriendClick({ id: 'global', name: 'Global Chat', avatar: '/images/icon11.png' })}>'''
             Global Chat Room
             </button>
             <button className="create-group">+ Create Group Chat</button>
