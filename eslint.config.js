@@ -29,6 +29,13 @@ export default defineConfig([
     },
   },
   {
+    files: ['functions/**/*.js'],
+    languageOptions: {
+      globals: globals.node,
+      sourceType: 'commonjs',
+    },
+  },
+  {
     files: ['src/react/__tests__/**/*.{js,jsx}'],
     plugins: { vitest },
     rules: vitest.configs.recommended.rules,

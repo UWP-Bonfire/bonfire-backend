@@ -41,7 +41,7 @@ exports.autoFriendBot = functions.auth.user().onCreate(async (user) => {
 
         const welcomeMsgRef = db.collection('chats').doc(chatId).collection('messages').doc();
         batch.set(welcomeMsgRef, {
-            text: "Hi there! I'm your Bonfire AI assistant. How can I help you today?",
+            text: "Hi there! I'm ZaiDBot your Bonfire AI assistant. How can I help you today?",
             senderId: BOT_UID,
             timestamp: admin.firestore.FieldValue.serverTimestamp()
         });
@@ -76,13 +76,21 @@ exports.onBotMessage = functions.firestore
         }
 
         try {
-            // --- MODEL CHANGE FOR REGIONAL AVAILABILITY ---
+           
             const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-            // --- END MODEL CHANGE ---
+            
+            let botText;
 
-            const result = await model.generateContent(messageData.text);
-            const response = await result.response;
-            const botText = response.text().trim();
+            if (messageData.history && Array.isArray(messageData.history) && messageData.history.length > 0) {
+                const chat = model.startChat({ history: messageData.history });
+                const result = await chat.sendMessage(messageData.text);
+                const response = await result.response;
+                botText = response.text().trim();
+            } else {
+                const result = await model.generateContent(messageData.text);
+                const response = await result.response;
+                botText = response.text().trim();
+            }
 
             if (!botText) {
                  console.error("Safeguard triggered: Extracted bot text is empty.");
