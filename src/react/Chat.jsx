@@ -3,11 +3,13 @@ import { useLocation } from 'react-router-dom';
 import { useAuth } from './hooks/useAuth';
 import useChat from './hooks/useChat';
 import useBlockUser from './hooks/useBlockUser';
+import useUserSettings from './hooks/useUserSettings';
+import useModeration from './hooks/useModeration';
 import '../css/chat.css';
 import { firestore } from '../../firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 
-const Message = ({ message, isSent, userProfile }) => (
+const Message = ({ message, isSent, userProfile, isModerated }) => (
     <div className={`message ${isSent ? 'sent' : 'received'}`}>
         <div className="message-bubble">
             <div className="message-info">
@@ -15,7 +17,11 @@ const Message = ({ message, isSent, userProfile }) => (
                     {userProfile ? userProfile.name : (message.displayName || 'Anonymous')}
                 </span>
             </div>
-            <p>{message.text}</p>
+            {isModerated ? (
+                <p><em>This message has been hidden due to community guidelines.</em></p>
+            ) : (
+                <p>{message.text}</p>
+            )}
         </div>
     </div>
 );
@@ -51,9 +57,12 @@ function Chat() {
     const friendId = queryParams.get('friendId');
     const { messages, loading, sendMessage, userProfiles } = useChat(friendId);
     const { blockedUsers, blockUser, unblockUser } = useBlockUser();
+    const { settings } = useUserSettings();
+    const { moderateMessage } = useModeration();
+    const [moderatedMessages, setModeratedMessages] = useState({});
     const messagesEndRef = useRef(null);
+    const processedMessages = useRef(new Set());
 
-    const isBlocked = friendId ? blockedUsers.includes(friendId) : false;
 
     useEffect(() => {
         if (!user || !friendId || friendId === 'global') return;
@@ -85,10 +94,24 @@ function Chat() {
         scrollToBottom();
     }, [messages]);
 
+    useEffect(() => {
+        if (settings.moderationEnabled) {
+            messages.forEach(async (message) => {
+                if (!processedMessages.current.has(message.id) && message.senderId !== user.uid) {
+                    processedMessages.current.add(message.id);
+                    const { isFlagged } = await moderateMessage(message.text);
+                    if (isFlagged) {
+                        setModeratedMessages(prev => ({ ...prev, [message.id]: true }));
+                    }
+                }
+            });
+        }
+    }, [messages, settings.moderationEnabled, user, moderateMessage]);
+
     const handleBlockToggle = () => {
         if (!friendId || friendId === 'global') return;
 
-        if (isBlocked) {
+        if (blockedUsers.includes(friendId)) {
             unblockUser(friendId);
         } else {
             blockUser(friendId);
@@ -105,7 +128,7 @@ function Chat() {
                 <h2>{friendId ? `Chat with ${userProfiles[friendId]?.name || '...'}` : 'Global Chat Room'}</h2>
                 {friendId && friendId !== 'global' && (
                     <button onClick={handleBlockToggle} className="block-button">
-                        {isBlocked ? 'Unblock User' : 'Block User'}
+                        {blockedUsers.includes(friendId) ? 'Unblock User' : 'Block User'}
                     </button>
                 )}
             </div>
@@ -116,11 +139,12 @@ function Chat() {
                         message={message}
                         isSent={message.senderId === user.uid}
                         userProfile={userProfiles[message.uid]}
+                        isModerated={!!moderatedMessages[message.id]}
                     />
                 ))}
                 <div ref={messagesEndRef} />
             </div>
-            <MessageInput onSendMessage={sendMessage} disabled={isBlocked} />
+            <MessageInput onSendMessage={sendMessage} disabled={blockedUsers.includes(friendId)} />
         </div>
     );
 }
