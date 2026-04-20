@@ -8,7 +8,7 @@ import '../css/chat.css';
 import { firestore } from '../../firebase';
 import { doc, updateDoc } from 'firebase/firestore';
 
-const Message = ({ message, isSent, userProfile }) => (
+const Message = ({ message, isSent, userProfile, settings }) => (
     <div className={`message ${isSent ? 'sent' : 'received'}`}>
         <div className="message-bubble">
             <div className="message-info">
@@ -16,7 +16,7 @@ const Message = ({ message, isSent, userProfile }) => (
                     {userProfile ? userProfile.name : (message.displayName || 'Anonymous')}
                 </span>
             </div>
-            {message.isModerated ? (
+            {message.isFlagged && settings.moderationEnabled ? (
                 <p><em>This message has been hidden due to community guidelines.</em></p>
             ) : (
                 <p>{message.text}</p>
@@ -120,6 +120,7 @@ function Chat() {
                         message={message}
                         isSent={message.senderId === user.uid}
                         userProfile={userProfiles[message.uid]}
+                        settings={settings}
                     />
                 ))}
                 <div ref={messagesEndRef} />
