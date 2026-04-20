@@ -78,13 +78,26 @@ const useChat = (friendId) => {
         const q = query(messagesCollectionRef, orderBy("timestamp"));
 
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            const allMessages = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            const filteredMessages = allMessages.filter(msg => !blockedUsers.includes(msg.senderId));
-            setMessages(filteredMessages);
+            const uidsToFetch = new Set();
 
-            const uids = [...new Set(filteredMessages.map(msg => msg.senderId).filter(Boolean))];
-            if (uids.length > 0) {
-                fetchUserProfiles(uids);
+            querySnapshot.docChanges().forEach((change) => {
+                const message = { id: change.doc.id, ...change.doc.data() };
+                if (blockedUsers.includes(message.senderId)) return;
+
+                if (change.type === "added") {
+                    setMessages(prev => [...prev, message]);
+                    if(message.senderId) uidsToFetch.add(message.senderId);
+                }
+                if (change.type === "modified") {
+                    setMessages(prev => prev.map(m => m.id === message.id ? message : m));
+                }
+                if (change.type === "removed") {
+                    setMessages(prev => prev.filter(m => m.id !== message.id));
+                }
+            });
+
+            if (uidsToFetch.size > 0) {
+                fetchUserProfiles(Array.from(uidsToFetch));
             }
 
             setLoading(false);
