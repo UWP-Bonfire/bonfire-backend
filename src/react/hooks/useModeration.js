@@ -1,20 +1,23 @@
-
 import { useState } from 'react';
+import { getFunctions, httpsCallable } from 'firebase/functions';
 
 const useModeration = () => {
   const [isModerating, setIsModerating] = useState(false);
 
   const moderateMessage = async (message) => {
     setIsModerating(true);
-    // Simulate an API call to a moderation service
-    await new Promise(resolve => setTimeout(resolve, 500));
-    setIsModerating(false);
-
-    // Placeholder logic: Flag messages containing certain keywords
-    const flaggedKeywords = ['inappropriate', 'spam', 'offensive'];
-    const isFlagged = flaggedKeywords.some(keyword => message.toLowerCase().includes(keyword));
-
-    return { isFlagged };
+    try {
+      const functions = getFunctions();
+      const moderateMessage = httpsCallable(functions, 'moderateMessage');
+      const result = await moderateMessage({ message });
+      const isFlagged = result.data.isFlagged;
+      return { isFlagged };
+    } catch (error) {
+      console.error('Error moderating message:', error);
+      return { isFlagged: false };
+    } finally {
+      setIsModerating(false);
+    }
   };
 
   return { moderateMessage, isModerating };

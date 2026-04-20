@@ -119,3 +119,45 @@ exports.onBotMessage = functions.firestore
             });
         }
     });
+
+exports.moderateNewMessage = functions.firestore
+    .document('chats/{chatId}/messages/{messageId}')
+    .onCreate(async (snap, context) => {
+        const messageData = snap.data();
+        const messageRef = snap.ref;
+
+        // Add a log to show the function was triggered and what message it's processing
+        console.log(`Moderating message: "${messageData.text}" from sender: ${messageData.senderId}`);
+
+        if (messageData.senderId === BOT_UID) {
+            console.log("Message is from bot, skipping moderation.");
+            return null;
+        }
+
+        const model = genAI.getGenerativeModel({
+            model: 'gemini-2.5-flash',
+            systemInstruction: 'You are a content moderator. Your task is to determine if a message is appropriate. Respond with only `appropriate` or `inappropriate`.',
+        });
+
+        try {
+            const result = await model.generateContent(messageData.text);
+            const response = await result.response;
+            const text = response.text().trim();
+
+            // Log the AI's response for debugging
+            console.log(`AI moderation response: "${text}"`);
+
+            if (text.toLowerCase().includes('inappropriate')) { // Make the check case-insensitive and more robust
+                console.log("Message flagged as inappropriate. Updating document.");
+                return messageRef.update({
+                    text: 'message flagged for explicit content',
+                    isModerated: true,
+                });
+            }
+            console.log("Message deemed appropriate.");
+            return null;
+        } catch (error) {
+            console.error('Error moderating message:', error);
+            return null;
+        }
+    });
