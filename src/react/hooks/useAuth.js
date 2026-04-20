@@ -14,8 +14,8 @@ const useAuth = () => {
     const [user, setUser] = useState(null);
     const [userProfile, setUserProfile] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isUnderage, setIsUnderage] = useState(null);
 
-    // Effect 1: Listen for auth state changes from Firebase Auth
     useEffect(() => {
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setLoading(true);
@@ -24,6 +24,7 @@ const useAuth = () => {
             } else {
                 setUser(null);
                 setUserProfile(null);
+                setIsUnderage(null);
                 setLoading(false);
             }
         });
@@ -31,15 +32,27 @@ const useAuth = () => {
         return () => unsubscribe();
     }, []);
 
-    // Effect 2: Listen for our user object and fetch/create the Firestore profile
     useEffect(() => {
         if (user) {
             const userRef = doc(firestore, 'users', user.uid);
             const unsubscribeProfile = onSnapshot(userRef, (docSnap) => {
                 if (docSnap.exists()) {
-                    setUserProfile(docSnap.data());
+                    const profileData = docSnap.data();
+                    setUserProfile(profileData);
+
+                    if (profileData.dob) {
+                        const birthDate = new Date(profileData.dob);
+                        const today = new Date();
+                        let age = today.getFullYear() - birthDate.getFullYear();
+                        const m = today.getMonth() - birthDate.getMonth();
+                        if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+                            age--;
+                        }
+                        setIsUnderage(age < 18);
+                    } else {
+                        setIsUnderage(false); // Default to not underage if no DOB
+                    }
                 } else {
-                    // This case is a fallback, the profile should be created on signup.
                     const newProfile = {
                         email: user.email,
                         createdAt: serverTimestamp(),
@@ -53,21 +66,22 @@ const useAuth = () => {
                     };
                     setDoc(userRef, newProfile);
                     setUserProfile(newProfile);
+                    setIsUnderage(false); // Default for new profiles
                 }
                 setLoading(false);
             }, (error) => {
                 console.error("Error fetching user profile:", error);
                 setUserProfile(null);
+                setIsUnderage(null);
                 setLoading(false);
             });
 
             return () => unsubscribeProfile();
         }
-    }, [user]); // This effect now correctly depends on the user state
+    }, [user]);
 
-    return { user, userProfile, loading };
+    return { user, userProfile, loading, isUnderage };
 };
-
 
 const useAuthentication = () => {
     const [error, setError] = useState('');
@@ -112,7 +126,6 @@ const useAuthentication = () => {
                 const user = userCredential.user;
                 await updateProfile(user, { displayName: username });
 
-                // Create user profile in Firestore immediately
                 const userRef = doc(firestore, 'users', user.uid);
                 const newProfile = {
                     email: user.email,
