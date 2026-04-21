@@ -38,4 +38,21 @@ The project follows a standard Vite-based React application structure.
 
 ## Current Task
 
-- Expanding test coverage to other core components of the application.
+### Global AI-Powered Chat Moderation
+
+**Objective:** Implement a global AI-powered moderation feature for incoming chat messages that users can enable or disable in their settings.
+
+**Plan:**
+
+1.  **`useUserSettings` Hook:**
+    -   Create a new custom hook `src/react/hooks/useUserSettings.js`.
+    -   This hook will manage user-specific settings, including the global AI moderation toggle. It will handle fetching and updating user settings in Firestore.
+
+2.  **`Chat.jsx` Component Integration:**
+    -   Modify the `src/react/Chat.jsx` component.
+    -   Integrate the `useUserSettings` and `useModeration` hooks.
+    -   The component will check if the global moderation setting is enabled and, if so, moderate incoming messages.
+
+3.  **`Settings.jsx` Component UI:**
+    -   Update the `src/react/Settings.jsx` component.
+    -   Add a toggle switch to allow users to enable or disable the global AI moderation feature.

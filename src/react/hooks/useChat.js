@@ -22,9 +22,15 @@ const useChat = (friendId) => {
     const { user, userProfile } = useAuth();
     const { blockedUsers } = useBlockUser();
     const [messages, setMessages] = useState([]);
+    const messagesRef = useRef(messages);
     const [loading, setLoading] = useState(true);
     const [userProfiles, setUserProfiles] = useState({});
     const profilesRef = useRef({});
+    const BOT_UID = "ps3Q2NASt3hTeb2b5cJ8";
+
+    useEffect(() => {
+        messagesRef.current = messages;
+    }, [messages]);
 
     useEffect(() => {
         profilesRef.current = userProfiles;
@@ -68,17 +74,30 @@ const useChat = (friendId) => {
         const isGlobalChat = friendId === 'global';
         const messagesPath = isGlobalChat ? 'messages' : `chats/${getChatId(user.uid, friendId)}/messages`;
 
-        const messagesRef = collection(firestore, messagesPath);
-        const q = query(messagesRef, orderBy("timestamp"));
+        const messagesCollectionRef = collection(firestore, messagesPath);
+        const q = query(messagesCollectionRef, orderBy("timestamp"));
 
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            const allMessages = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            const filteredMessages = allMessages.filter(msg => !blockedUsers.includes(msg.senderId));
-            setMessages(filteredMessages);
+            const uidsToFetch = new Set();
 
-            const uids = [...new Set(filteredMessages.map(msg => msg.senderId).filter(Boolean))];
-            if (uids.length > 0) {
-                fetchUserProfiles(uids);
+            querySnapshot.docChanges().forEach((change) => {
+                const message = { id: change.doc.id, ...change.doc.data() };
+                if (blockedUsers.includes(message.senderId)) return;
+
+                if (change.type === "added") {
+                    setMessages(prev => [...prev, message]);
+                    if(message.senderId) uidsToFetch.add(message.senderId);
+                }
+                if (change.type === "modified") {
+                    setMessages(prev => prev.map(m => m.id === message.id ? message : m));
+                }
+                if (change.type === "removed") {
+                    setMessages(prev => prev.filter(m => m.id !== message.id));
+                }
+            });
+
+            if (uidsToFetch.size > 0) {
+                fetchUserProfiles(Array.from(uidsToFetch));
             }
 
             setLoading(false);
@@ -98,8 +117,9 @@ const useChat = (friendId) => {
         }
 
         const isGlobalChat = friendId === 'global';
+        const isAiChat = friendId === BOT_UID;
         const messagesPath = isGlobalChat ? 'messages' : `chats/${getChatId(user.uid, friendId)}/messages`;
-        const messagesRef = collection(firestore, messagesPath);
+        const messagesCollectionRef = collection(firestore, messagesPath);
 
         try {
             let messagePayload = {
@@ -110,6 +130,14 @@ const useChat = (friendId) => {
                 photoURL: userProfile.avatar,
                 read: false,
             };
+
+            if (isAiChat) {
+                const chatHistory = messagesRef.current.map(msg => ({
+                    role: msg.senderId === user.uid ? 'user' : 'model',
+                    parts: [{ text: msg.text }],
+                }));
+                messagePayload.history = chatHistory;
+            }
 
             if (!isGlobalChat) {
                 const chatId = getChatId(user.uid, friendId);
@@ -139,12 +167,12 @@ const useChat = (friendId) => {
                 }
             }
             
-            await addDoc(messagesRef, messagePayload);
+            await addDoc(messagesCollectionRef, messagePayload);
 
         } catch (err) {
             console.error("Error sending message: ", err);
         }
-    }, [user, userProfile, friendId, blockedUsers]);
+    }, [user, userProfile, friendId, blockedUsers, BOT_UID]);
 
     const markMessageAsRead = useCallback(async (messageId) => {
         if (!user || !friendId || friendId === 'global') return;
