@@ -16,6 +16,7 @@ import useBlockUser from "./hooks/useBlockUser";
 import settingsIcon from '../assets/Settings.svg';
 import bellIcon from '../assets/Bell.png';
 import messageIcon from '../assets/images/message.png';
+import Avatar from "./Avatar";
 
 export default function Friends() {
   const navigate = useNavigate();
@@ -208,7 +209,7 @@ useEffect(() => {
               key={friend.id}
               onClick={() => handleChatClick(friend.id)}
             >
-              <img src={friend.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'} alt={friend.name} />
+              <Avatar src={friend.avatar} alt={friend.name} />
               <span>{friend.name}</span>
               {unreadCounts[friend.id] > 0 && (
                 <span className="unread-count">{unreadCounts[friend.id]}</span>
@@ -223,7 +224,7 @@ useEffect(() => {
           </div>
           {user && userProfile && (
             <div className="user" onClick={() => navigate("/app/account")}>
-              <img src={userProfile.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'} alt="User" />
+              <Avatar src={userProfile.avatar} alt="User" />
               <span>{user.displayName}</span>
             </div>
           )}
@@ -247,7 +248,7 @@ useEffect(() => {
                 {notifications.length > 0 ? (
                   notifications.map(notif => (
                     <div key={notif.id} className="notification-item">
-                      <img src={notif.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'} alt="avatar" />
+                      <Avatar src={notif.avatar} alt="avatar" />
                       <span>{notif.title}</span>
                       {notif.type === 'friendRequest' && (
                         <div className="notification-actions">
@@ -276,7 +277,7 @@ useEffect(() => {
             ) : (
                 filteredFriends.map((friend) => (
                     <div className="friend-card" key={friend.id}>
-                        <img src={friend.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'} alt={friend.name} />
+                        <Avatar src={friend.avatar} alt={friend.name} />
                         <div className="friend-info">
                             <span className="friend-name">{friend.name}</span>
                             {unreadCounts[friend.id] > 0 && (

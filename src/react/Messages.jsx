@@ -8,6 +8,7 @@ import { firestore } from "../firebase";
 import { collection, query, where, onSnapshot } from "firebase/firestore";
 import arrowIcon from "../assets/images/arrow.png";
 import rightArrowIcon from "../assets/images/right-arrow.png";
+import Avatar from "./Avatar"; // Import the new Avatar component
 
 const MessageInput = ({ message, setMessage, onSendMessage }) => {
     const handleSubmit = (e) => {
@@ -43,8 +44,8 @@ const MessageRow = ({ message, user, userProfiles, isLast, isGlobalChat }) => {
 
     return (
         <div className={`message-row ${isSent ? "sent" : "received"}`}>
-            <img
-                src={userProfiles[message.senderId]?.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'}
+            <Avatar
+                src={userProfiles[message.senderId]?.avatar}
                 alt={userProfiles[message.senderId]?.name || 'Anonymous'}
                 className="msg-avatar"
             />
@@ -93,8 +94,8 @@ const ChatView = ({ friend, isGlobalChat }) => {
     return (
       <>
         <div className="chat-header">
-          <img
-            src={friend.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'}
+          <Avatar
+            src={friend.avatar}
             alt={friend.name}
             className="chat-header-avatar"
           />
@@ -208,7 +209,7 @@ export default function Messages() {
                   key={friend.id}
                   onClick={() => handleFriendClick(friend)}
                 >
-                  <img src={friend.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'} alt={friend.name} />
+                  <Avatar src={friend.avatar} alt={friend.name} />
                   <span>{friend.name}</span>
                   {unreadCounts[friend.id] > 0 && !friend.isMuted && (
                     <span className="unread-count">{unreadCounts[friend.id]}</span>
@@ -219,7 +220,7 @@ export default function Messages() {
           </div>
         </div>
         <div className="sidebar-bottom-buttons">
-            <button className="create-group" onClick={() => handleFriendClick({ id: 'global', name: 'Global Chat', avatar: '/images/icon11.png' })}>'''
+            <button className="create-group" onClick={() => handleFriendClick({ id: 'global', name: 'Global Chat', avatar: '/images/icon11.png' })}>
             Global Chat Room
             </button>
             <button className="create-group">+ Create Group Chat</button>

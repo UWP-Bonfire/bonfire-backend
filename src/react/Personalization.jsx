@@ -8,6 +8,7 @@ import {
 import { getStorage, ref, listAll, getDownloadURL } from "firebase/storage";
 import { useAuth } from "./hooks/useAuth";
 import "../css/personalization.css";
+import Avatar from "./Avatar";
 
 export default function Personalization() {
   const navigate = useNavigate();
@@ -88,7 +89,7 @@ export default function Personalization() {
 
       {/* Live Preview */}
       <div className="top-preview-card" style={{ backgroundColor: bgColor }}>
-        {avatar && <img src={avatar} alt="Avatar" className="top-avatar" />}
+        {avatar && <Avatar src={avatar} alt="Avatar" className="top-avatar" />}
         <h3 style={{ color: usernameColor }}>{displayName}</h3>
         <p>{bio}</p>
       </div>
@@ -99,7 +100,7 @@ export default function Personalization() {
           <h2>Choose Your Profile Picture</h2>
           <div className="avatar-options">
             {presetAvatars.map((img, index) => (
-              <img
+              <Avatar
                 key={index}
                 src={img}
                 alt={`Avatar ${index + 1}`}
