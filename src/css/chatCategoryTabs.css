@@ -1,0 +1,41 @@
+/* src/css/chatCategoryTabs.css */
+.chat-category-tabs-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+    background-color: #f0f0f0;
+    padding: 10px;
+    border-radius: 8px;
+}
+
+.chat-category-tabs {
+    display: flex;
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.chat-category-tabs li {
+    padding: 10px 20px;
+    cursor: pointer;
+    background-color: #fff;
+    color: #333;
+    border-right: 1px solid #ccc;
+    transition: background-color 0.3s;
+}
+
+.chat-category-tabs li:last-child {
+    border-right: none;
+}
+
+.chat-category-tabs li.active {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.chat-category-tabs li:hover {
+    background-color: #e0e0e0;
+}

@@ -17,6 +17,8 @@ import settingsIcon from '../assets/Settings.svg';
 import bellIcon from '../assets/Bell.png';
 import messageIcon from '../assets/images/message.png';
 import Avatar from "./Avatar";
+import ChatCategoryTabs from "./ChatCategoryTabs";
+import useCategorizedFriends from "./hooks/useCategorizedFriends";
 
 export default function Friends() {
   const navigate = useNavigate();
@@ -32,6 +34,9 @@ export default function Friends() {
   const { blockUser, unblockUser, blockedUsers } = useBlockUser();
   const [chatLimits, setChatLimits] = useState({});
   const menuRef = useRef(null);
+  const [activeCategory, setActiveCategory] = useState('All');
+  const categorizedFriends = useCategorizedFriends(friends, activeCategory);
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -185,6 +190,10 @@ useEffect(() => {
     setActiveOptionsMenu(null);
   };
 
+  const handleGlobalChatClick = () => {
+    navigate(`/app/chat`, { state: { friendId: 'global' } });
+  }
+
 
   if (loading) {
     return <div>Loading friends...</div>;
@@ -194,7 +203,7 @@ useEffect(() => {
     return <div className="error-message">{error}</div>;
   }
 
-  const filteredFriends = friends.filter(friend => !blockedUsers.includes(friend.id));
+  const filteredFriends = categorizedFriends.filter(friend => !blockedUsers.includes(friend.id));
 
   return (
     <div className="container">
@@ -269,8 +278,12 @@ useEffect(() => {
 
         <FriendRequests />
 
+        <ChatCategoryTabs activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
+
         <div className="friends-container">
-          {filteredFriends.length === 0 ? (
+        {activeCategory === 'Global' ? (
+          <button onClick={handleGlobalChatClick} className="global-chat-btn">Join Global Chat</button>
+        ) : filteredFriends.length === 0 ? (
                 <div className="no-friends-message">
                     <p>You haven't added any friends yet. Use the "Add Friend" button to connect with others.</p>
                 </div>
