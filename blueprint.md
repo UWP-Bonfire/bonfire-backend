@@ -36,6 +36,11 @@ The project follows a standard Vite-based React application structure.
   - `src/react/__tests__/Login.test.jsx`: Includes tests for rendering the login form, user input, form submission, error handling, and the loading state.
   - `src/react/__tests__/SignUp.test.jsx`: Includes tests for rendering the sign-up form, user input, form submission, error handling, the loading state, and the email verification message.
 
+### Chat Categorization
+- **`ChatCategoryTabs.jsx` Component:** Created a new component to display the chat categories (All, Group, 18+, Individual, Global, Favorites).
+- **`useCategorizedFriends` Hook:** Developed a custom hook to filter the friends list based on the selected chat category.
+- **Integration:** The `ChatCategoryTabs` component and `useCategorizedFriends` hook are integrated into the `Friends.jsx` component to provide chat categorization functionality.
+
 ## Current Task
 
 ### Global AI-Powered Chat Moderation

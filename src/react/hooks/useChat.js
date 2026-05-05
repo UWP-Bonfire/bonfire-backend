@@ -17,6 +17,7 @@ import {
     increment,
 } from 'firebase/firestore';
 import useBlockUser from './useBlockUser';
+import useUserManagement from './useUserManagement';
 
 const useChat = (friendId) => {
     const { user, userProfile } = useAuth();
@@ -24,42 +25,18 @@ const useChat = (friendId) => {
     const [messages, setMessages] = useState([]);
     const messagesRef = useRef(messages);
     const [loading, setLoading] = useState(true);
-    const [userProfiles, setUserProfiles] = useState({});
-    const profilesRef = useRef({});
     const BOT_UID = "ps3Q2NASt3hTeb2b5cJ8";
+
+    const allUserIds = messages.map(m => m.senderId).concat(friendId, user?.uid);
+    const { userProfiles } = useUserManagement(allUserIds);
 
     useEffect(() => {
         messagesRef.current = messages;
     }, [messages]);
 
-    useEffect(() => {
-        profilesRef.current = userProfiles;
-    }, [userProfiles]);
-
     const getChatId = (uid1, uid2) => {
         return [uid1, uid2].sort().join('_');
     };
-
-    const fetchUserProfiles = useCallback(async (uids) => {
-        const uidsToFetch = uids.filter(uid => !profilesRef.current[uid]);
-        if (uidsToFetch.length === 0) return;
-
-        const newUserProfiles = {};
-        const chunks = [];
-        for (let i = 0; i < uidsToFetch.length; i += 30) {
-            chunks.push(uidsToFetch.slice(i, i + 30));
-        }
-
-        for (const chunk of chunks) {
-            const usersQuery = query(collection(firestore, 'users'), where('__name__', 'in', chunk));
-            const usersSnapshot = await getDocs(usersQuery);
-            usersSnapshot.forEach(doc => {
-                newUserProfiles[doc.id] = doc.data();
-            });
-        }
-
-        setUserProfiles(prevProfiles => ({ ...prevProfiles, ...newUserProfiles }));
-    }, []);
 
     useEffect(() => {
         if (!user || !friendId) {
@@ -78,15 +55,12 @@ const useChat = (friendId) => {
         const q = query(messagesCollectionRef, orderBy("timestamp"));
 
         const unsubscribe = onSnapshot(q, (querySnapshot) => {
-            const uidsToFetch = new Set();
-
             querySnapshot.docChanges().forEach((change) => {
                 const message = { id: change.doc.id, ...change.doc.data() };
                 if (blockedUsers.includes(message.senderId)) return;
 
                 if (change.type === "added") {
                     setMessages(prev => [...prev, message]);
-                    if(message.senderId) uidsToFetch.add(message.senderId);
                 }
                 if (change.type === "modified") {
                     setMessages(prev => prev.map(m => m.id === message.id ? message : m));
@@ -96,10 +70,6 @@ const useChat = (friendId) => {
                 }
             });
 
-            if (uidsToFetch.size > 0) {
-                fetchUserProfiles(Array.from(uidsToFetch));
-            }
-
             setLoading(false);
         }, (err) => {
             console.error("Error fetching messages: ", err);
@@ -107,7 +77,7 @@ const useChat = (friendId) => {
         });
 
         return () => unsubscribe();
-    }, [user, friendId, fetchUserProfiles, blockedUsers]);
+    }, [user, friendId, blockedUsers]);
 
     const sendMessage = useCallback(async (text) => {
         if (text.trim() === "" || !user || !userProfile || !friendId) return;

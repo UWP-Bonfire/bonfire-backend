@@ -7,13 +7,15 @@ import useUserSettings from './hooks/useUserSettings';
 import '../css/chat.css';
 import { firestore } from '../../firebase';
 import { doc, updateDoc } from 'firebase/firestore';
+import Avatar from './Avatar';
 
 const Message = ({ message, isSent, userProfile, settings }) => (
     <div className={`message ${isSent ? 'sent' : 'received'}`}>
+        <Avatar src={userProfile?.avatar} alt={userProfile?.name || 'Anonymous'} className="chat-avatar" />
         <div className="message-bubble">
             <div className="message-info">
                 <span className="display-name">
-                    {userProfile ? userProfile.name : (message.displayName || 'Anonymous')}
+                    {userProfile?.name || message.displayName || 'Anonymous'}
                 </span>
             </div>
             {message.isFlagged && settings.moderationEnabled ? (
@@ -106,6 +108,7 @@ function Chat() {
     return (
         <div className="chat-container">
             <div className="chat-header">
+                {friendId && friendId !== 'global' && <Avatar src={userProfiles[friendId]?.avatar} alt={userProfiles[friendId]?.name} className="chat-header-avatar" />}
                 <h2>{friendId ? `Chat with ${userProfiles[friendId]?.name || '...'}` : 'Global Chat Room'}</h2>
                 {friendId && friendId !== 'global' && (
                     <button onClick={handleBlockToggle} className="block-button">
@@ -119,7 +122,7 @@ function Chat() {
                         key={message.id}
                         message={message}
                         isSent={message.senderId === user.uid}
-                        userProfile={userProfiles[message.uid]}
+                        userProfile={userProfiles[message.senderId]}
                         settings={settings}
                     />
                 ))}

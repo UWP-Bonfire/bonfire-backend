@@ -1,49 +1,35 @@
 import { useState, useEffect } from 'react';
 import { firestore } from '../../firebase';
-import { collection, doc, onSnapshot, getDocs, query, where, documentId, updateDoc, arrayRemove, setDoc, deleteDoc } from 'firebase/firestore';
+import { collection, doc, onSnapshot, getDocs, query, where, updateDoc, arrayRemove, setDoc, deleteDoc, arrayUnion } from 'firebase/firestore';
 import { useAuth } from './useAuth';
 import useBlockUser from './useBlockUser';
+import useUserManagement from './useUserManagement';
 
 const useFriends = () => {
     const { user } = useAuth();
     const { blockedUsers } = useBlockUser();
+    const [friendIds, setFriendIds] = useState([]);
     const [friends, setFriends] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [favorited, setFavorited] = useState([]);
+
+    const { userProfiles, loading: profilesLoading } = useUserManagement(friendIds);
 
     useEffect(() => {
         if (!user) {
-            setFriends([]);
+            setFriendIds([]);
             setLoading(false);
             return;
         }
 
         const userDocRef = doc(firestore, 'users', user.uid);
 
-        const unsubscribe = onSnapshot(userDocRef, async (userDocSnap) => {
+        const unsubscribe = onSnapshot(userDocRef, (userDocSnap) => {
             if (userDocSnap.exists()) {
-                const friendIds = userDocSnap.data().friends;
-                if (friendIds && friendIds.length > 0) {
-                    const friendsQuery = query(collection(firestore, 'users'), where(documentId(), 'in', friendIds));
-                    try {
-                        const querySnapshot = await getDocs(friendsQuery);
-                        const friendsData = await Promise.all(querySnapshot.docs.map(async (doc) => {
-                            const friend = { id: doc.id, ...doc.data() };
-                            const muteDocRef = collection(firestore, 'muted');
-                            const muteQuery = query(muteDocRef, where('muterId', '==', user.uid), where('mutedId', '==', friend.id));
-                            const muteSnapshot = await getDocs(muteQuery);
-                            friend.isMuted = !muteSnapshot.empty;
-                            return friend;
-                        }));
-                        const nonBlockedFriends = friendsData.filter(friend => !blockedUsers.includes(friend.id));
-                        setFriends(nonBlockedFriends);
-                    } catch (err) {
-                         console.error("Error fetching friends data: ", err);
-                         setError("Failed to fetch friends list.");
-                    }
-                } else {
-                    setFriends([]);
-                }
+                const data = userDocSnap.data();
+                setFriendIds(data.friends || []);
+                setFavorited(data.favorited || []);
             }
             setLoading(false);
         }, (err) => {
@@ -53,7 +39,33 @@ const useFriends = () => {
         });
 
         return () => unsubscribe();
-    }, [user, blockedUsers]);
+    }, [user]);
+
+    useEffect(() => {
+        if (profilesLoading || loading) return;
+
+        const getMutedStatus = async (friendId) => {
+            const muteDocRef = collection(firestore, 'muted');
+            const muteQuery = query(muteDocRef, where('muterId', '==', user.uid), where('mutedId', '==', friendId));
+            const muteSnapshot = await getDocs(muteQuery);
+            return !muteSnapshot.empty;
+        };
+
+        const fetchFriendsData = async () => {
+            const friendsData = await Promise.all(
+                friendIds.map(async (id) => {
+                    if (blockedUsers.includes(id) || !userProfiles[id]) return null;
+                    const isMuted = await getMutedStatus(id);
+                    const isFavorited = favorited.includes(id);
+                    return { ...userProfiles[id], isMuted, isFavorited };
+                })
+            );
+            setFriends(friendsData.filter(Boolean));
+        };
+
+        fetchFriendsData();
+
+    }, [friendIds, profilesLoading, loading, blockedUsers, user, userProfiles, favorited]);
 
     const unfriend = async (friendId) => {
         if (!user) {
@@ -62,31 +74,21 @@ const useFriends = () => {
         }
 
         try {
-            // 1. Remove friend from both users' friend lists
             const userDocRef = doc(firestore, 'users', user.uid);
-            await updateDoc(userDocRef, {
-                friends: arrayRemove(friendId)
-            });
+            await updateDoc(userDocRef, { friends: arrayRemove(friendId) });
 
             const friendDocRef = doc(firestore, 'users', friendId);
-            await updateDoc(friendDocRef, {
-                friends: arrayRemove(user.uid)
-            });
+            await updateDoc(friendDocRef, { friends: arrayRemove(user.uid) });
 
-            // 2. Delete the chat history
             const chatId = [user.uid, friendId].sort().join('_');
             const chatDocRef = doc(firestore, 'chats', chatId);
             const messagesCollectionRef = collection(chatDocRef, 'messages');
 
-            // Get all messages and delete them
             const messagesSnapshot = await getDocs(messagesCollectionRef);
             const deletePromises = messagesSnapshot.docs.map(doc => deleteDoc(doc.ref));
             await Promise.all(deletePromises);
-
-            // Delete the chat document itself
             await deleteDoc(chatDocRef);
 
-            // 3. Update local state to remove the friend from the UI
             setFriends(prevFriends => prevFriends.filter(friend => friend.id !== friendId));
 
         } catch (err) {
@@ -119,7 +121,31 @@ const useFriends = () => {
         }
     };
 
-    return { friends, loading, error, unfriend, muteUser, unmuteUser };
+    const favoriteUser = async (friendId) => {
+        if (!user) return;
+        const userDocRef = doc(firestore, 'users', user.uid);
+        try {
+            await updateDoc(userDocRef, { favorited: arrayUnion(friendId) });
+            setFriends(friends.map(f => f.id === friendId ? { ...f, isFavorited: true } : f));
+        } catch (err) {
+            console.error("Error favoriting user: ", err);
+            setError("Error favoriting user.");
+        }
+    };
+
+    const unfavoriteUser = async (friendId) => {
+        if (!user) return;
+        const userDocRef = doc(firestore, 'users', user.uid);
+        try {
+            await updateDoc(userDocRef, { favorited: arrayRemove(friendId) });
+            setFriends(friends.map(f => f.id === friendId ? { ...f, isFavorited: false } : f));
+        } catch (err) {
+            console.error("Error unfavoriting user: ", err);
+            setError("Error unfavoriting user.");
+        }
+    };
+
+    return { friends, loading: loading || profilesLoading, error, unfriend, muteUser, unmuteUser, favoriteUser, unfavoriteUser };
 };
 
 export default useFriends;
