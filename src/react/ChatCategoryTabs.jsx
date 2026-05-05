@@ -2,7 +2,7 @@ import React from 'react';
 import '../css/chatCategoryTabs.css';
 
 const ChatCategoryTabs = ({ activeCategory, setActiveCategory }) => {
-    const categories = ['All', 'Group', '18+', 'Individual', 'Global', 'Favorites'];
+    const categories = ['All', 'Group', '18+', 'Individual', 'Global'];
 
     return (
         <div className="chat-category-tabs-container">

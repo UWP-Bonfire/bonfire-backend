@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { firestore } from '../../firebase';
-import { collection, doc, onSnapshot, getDocs, query, where, updateDoc, arrayRemove, setDoc, deleteDoc } from 'firebase/firestore';
+import { collection, doc, onSnapshot, getDocs, query, where, updateDoc, arrayRemove, setDoc, deleteDoc, arrayUnion } from 'firebase/firestore';
 import { useAuth } from './useAuth';
 import useBlockUser from './useBlockUser';
 import useUserManagement from './useUserManagement';
@@ -12,6 +12,7 @@ const useFriends = () => {
     const [friends, setFriends] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [favorited, setFavorited] = useState([]);
 
     const { userProfiles, loading: profilesLoading } = useUserManagement(friendIds);
 
@@ -26,8 +27,9 @@ const useFriends = () => {
 
         const unsubscribe = onSnapshot(userDocRef, (userDocSnap) => {
             if (userDocSnap.exists()) {
-                const ids = userDocSnap.data().friends || [];
-                setFriendIds(ids);
+                const data = userDocSnap.data();
+                setFriendIds(data.friends || []);
+                setFavorited(data.favorited || []);
             }
             setLoading(false);
         }, (err) => {
@@ -54,7 +56,8 @@ const useFriends = () => {
                 friendIds.map(async (id) => {
                     if (blockedUsers.includes(id) || !userProfiles[id]) return null;
                     const isMuted = await getMutedStatus(id);
-                    return { ...userProfiles[id], isMuted };
+                    const isFavorited = favorited.includes(id);
+                    return { ...userProfiles[id], isMuted, isFavorited };
                 })
             );
             setFriends(friendsData.filter(Boolean));
@@ -62,7 +65,7 @@ const useFriends = () => {
 
         fetchFriendsData();
 
-    }, [friendIds, profilesLoading, loading, blockedUsers, user, userProfiles]);
+    }, [friendIds, profilesLoading, loading, blockedUsers, user, userProfiles, favorited]);
 
     const unfriend = async (friendId) => {
         if (!user) {
@@ -118,7 +121,31 @@ const useFriends = () => {
         }
     };
 
-    return { friends, loading: loading || profilesLoading, error, unfriend, muteUser, unmuteUser };
+    const favoriteUser = async (friendId) => {
+        if (!user) return;
+        const userDocRef = doc(firestore, 'users', user.uid);
+        try {
+            await updateDoc(userDocRef, { favorited: arrayUnion(friendId) });
+            setFriends(friends.map(f => f.id === friendId ? { ...f, isFavorited: true } : f));
+        } catch (err) {
+            console.error("Error favoriting user: ", err);
+            setError("Error favoriting user.");
+        }
+    };
+
+    const unfavoriteUser = async (friendId) => {
+        if (!user) return;
+        const userDocRef = doc(firestore, 'users', user.uid);
+        try {
+            await updateDoc(userDocRef, { favorited: arrayRemove(friendId) });
+            setFriends(friends.map(f => f.id === friendId ? { ...f, isFavorited: false } : f));
+        } catch (err) {
+            console.error("Error unfavoriting user: ", err);
+            setError("Error unfavoriting user.");
+        }
+    };
+
+    return { friends, loading: loading || profilesLoading, error, unfriend, muteUser, unmuteUser, favoriteUser, unfavoriteUser };
 };
 
 export default useFriends;

@@ -22,7 +22,7 @@ import useCategorizedFriends from "./hooks/useCategorizedFriends";
 
 export default function Friends() {
   const navigate = useNavigate();
-  const { friends, loading, error, unfriend, muteUser, unmuteUser } = useFriends();
+  const { friends, loading, error, unfriend, muteUser, unmuteUser, favoriteUser, unfavoriteUser } = useFriends();
   const { user, userProfile } = useAuth();
   const { requestPermission } = useNotifications();
   const [unreadCounts, setUnreadCounts] = useState({});
@@ -176,6 +176,15 @@ useEffect(() => {
     setActiveOptionsMenu(null);
   };
 
+  const handleFavoriteToggle = (friend) => {
+    if (friend.isFavorited) {
+      unfavoriteUser(friend.id);
+    } else {
+      favoriteUser(friend.id);
+    }
+    setActiveOptionsMenu(null);
+  };
+
   const handleLimitToggle = (friendId) => {
     toggleLimit(friendId, chatLimits[friendId]);
     setActiveOptionsMenu(null);
@@ -204,6 +213,7 @@ useEffect(() => {
   }
 
   const filteredFriends = categorizedFriends.filter(friend => !blockedUsers.includes(friend.id));
+  const favoritedFriends = friends.filter(friend => friend.isFavorited && !blockedUsers.includes(friend.id));
 
   return (
     <div className="container">
@@ -212,7 +222,7 @@ useEffect(() => {
         <h2>Direct Messages</h2>
 
         <div className="dm-list">
-          {filteredFriends.map((friend) => (
+          {favoritedFriends.map((friend) => (
             <div
               className="dm"
               key={friend.id}
@@ -308,6 +318,9 @@ useEffect(() => {
                                   <div className="options-menu-item" onClick={() => handleUnfriend(friend.id)}>Unfriend</div>
                                   <div className="options-menu-item" onClick={() => handleMuteToggle(friend)}>
                                     {friend.isMuted ? 'Unmute' : 'Mute'}
+                                  </div>
+                                  <div className="options-menu-item" onClick={() => handleFavoriteToggle(friend)}>
+                                    {friend.isFavorited ? 'Unfavorite' : 'Favorite'}
                                   </div>
                                   <div className="options-menu-item" onClick={() => handleLimitToggle(friend.id)}>
                                     {chatLimits[friend.id] ? 'Disable Limiting' : 'Limit Notifications'}
