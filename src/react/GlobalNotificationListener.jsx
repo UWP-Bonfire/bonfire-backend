@@ -14,7 +14,7 @@ const getChatId = (uid1, uid2) => {
 const GlobalNotificationListener = () => {
     const { user } = useAuth();
     const { friends } = useFriends();
-    const { updateFavicon } = useFavicon('/images/Logo.png');
+    const { updateFavicon } = useFavicon('src/assets/images/Logo.png');
     const { showNotification } = useNotifications();
     const [unreadCounts, setUnreadCounts] = useState({});
     const [chatLimits, setChatLimits] = useState({});

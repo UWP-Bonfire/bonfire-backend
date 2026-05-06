@@ -36,6 +36,28 @@ The project follows a standard Vite-based React application structure.
   - `src/react/__tests__/Login.test.jsx`: Includes tests for rendering the login form, user input, form submission, error handling, and the loading state.
   - `src/react/__tests__/SignUp.test.jsx`: Includes tests for rendering the sign-up form, user input, form submission, error handling, the loading state, and the email verification message.
 
+### Chat Categorization
+- **`ChatCategoryTabs.jsx` Component:** Created a new component to display the chat categories (All, Group, 18+, Individual, Global, Favorites).
+- **`useCategorizedFriends` Hook:** Developed a custom hook to filter the friends list based on the selected chat category.
+- **Integration:** The `ChatCategoryTabs` component and `useCategorizedFriends` hook are integrated into the `Friends.jsx` component to provide chat categorization functionality.
+
 ## Current Task
 
-- Expanding test coverage to other core components of the application.
+### Global AI-Powered Chat Moderation
+
+**Objective:** Implement a global AI-powered moderation feature for incoming chat messages that users can enable or disable in their settings.
+
+**Plan:**
+
+1.  **`useUserSettings` Hook:**
+    -   Create a new custom hook `src/react/hooks/useUserSettings.js`.
+    -   This hook will manage user-specific settings, including the global AI moderation toggle. It will handle fetching and updating user settings in Firestore.
+
+2.  **`Chat.jsx` Component Integration:**
+    -   Modify the `src/react/Chat.jsx` component.
+    -   Integrate the `useUserSettings` and `useModeration` hooks.
+    -   The component will check if the global moderation setting is enabled and, if so, moderate incoming messages.
+
+3.  **`Settings.jsx` Component UI:**
+    -   Update the `src/react/Settings.jsx` component.
+    -   Add a toggle switch to allow users to enable or disable the global AI moderation feature.

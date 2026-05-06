@@ -41,7 +41,7 @@ exports.autoFriendBot = functions.auth.user().onCreate(async (user) => {
 
         const welcomeMsgRef = db.collection('chats').doc(chatId).collection('messages').doc();
         batch.set(welcomeMsgRef, {
-            text: "Hi there! I'm your Bonfire AI assistant. How can I help you today?",
+            text: "Hi there! I'm ZaiDBot your Bonfire AI assistant. How can I help you today?",
             senderId: BOT_UID,
             timestamp: admin.firestore.FieldValue.serverTimestamp()
         });
@@ -76,13 +76,24 @@ exports.onBotMessage = functions.firestore
         }
 
         try {
-            // --- MODEL CHANGE FOR REGIONAL AVAILABILITY ---
-            const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-            // --- END MODEL CHANGE ---
+            const personalityPrompt = "You are Zai, a friendly and witty AI companion in a chat app called Bonfire. Your goal is to be a helpful and engaging friend to the user, not just a generic assistant. You are not a large language model, you are Zai. Use a warm, conversational tone, and don't be afraid to crack a joke or be a little sassy. Offer encouragement and practical advice when needed. Keep your responses concise and easy to read, and use emojis where appropriate.";
+            const model = genAI.getGenerativeModel({ 
+                model: "gemini-2.5-flash",
+                systemInstruction: personalityPrompt,
+            });
+            
+            let botText;
 
-            const result = await model.generateContent(messageData.text);
-            const response = await result.response;
-            const botText = response.text().trim();
+            if (messageData.history && Array.isArray(messageData.history) && messageData.history.length > 0) {
+                const chat = model.startChat({ history: messageData.history });
+                const result = await chat.sendMessage(messageData.text);
+                const response = await result.response;
+                botText = response.text().trim();
+            } else {
+                const result = await model.generateContent(messageData.text);
+                const response = await result.response;
+                botText = response.text().trim();
+            }
 
             if (!botText) {
                  console.error("Safeguard triggered: Extracted bot text is empty.");
@@ -106,5 +117,36 @@ exports.onBotMessage = functions.firestore
                 senderId: BOT_UID,
                 timestamp: admin.firestore.FieldValue.serverTimestamp()
             });
+        }
+    });
+
+exports.moderateNewMessage = functions.firestore
+    .document('chats/{chatId}/messages/{messageId}')
+    .onCreate(async (snap, context) => {
+        const messageData = snap.data();
+        const messageRef = snap.ref;
+
+        if (messageData.senderId === BOT_UID) {
+            return null;
+        }
+
+        const model = genAI.getGenerativeModel({
+            model: 'gemini-2.5-flash',
+            systemInstruction: 'You are a content moderator. Your task is to determine if a message is appropriate. Respond with only `appropriate` or `inappropriate`.',
+        });
+
+        try {
+            const result = await model.generateContent(messageData.text);
+            const response = await result.response;
+            const text = response.text().trim();
+
+            if (text.toLowerCase().includes('inappropriate')) {
+                return messageRef.update({ isFlagged: true });
+            }
+
+            return null;
+        } catch (error) {
+            console.error('Error moderating message:', error);
+            return null;
         }
     });

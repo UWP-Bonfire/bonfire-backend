@@ -16,10 +16,13 @@ import useBlockUser from "./hooks/useBlockUser";
 import settingsIcon from '../assets/Settings.svg';
 import bellIcon from '../assets/Bell.png';
 import messageIcon from '../assets/images/message.png';
+import Avatar from "./Avatar";
+import ChatCategoryTabs from "./ChatCategoryTabs";
+import useCategorizedFriends from "./hooks/useCategorizedFriends";
 
 export default function Friends() {
   const navigate = useNavigate();
-  const { friends, loading, error, unfriend, muteUser, unmuteUser } = useFriends();
+  const { friends, loading, error, unfriend, muteUser, unmuteUser, favoriteUser, unfavoriteUser } = useFriends();
   const { user, userProfile } = useAuth();
   const { requestPermission } = useNotifications();
   const [unreadCounts, setUnreadCounts] = useState({});
@@ -31,6 +34,9 @@ export default function Friends() {
   const { blockUser, unblockUser, blockedUsers } = useBlockUser();
   const [chatLimits, setChatLimits] = useState({});
   const menuRef = useRef(null);
+  const [activeCategory, setActiveCategory] = useState('All');
+  const categorizedFriends = useCategorizedFriends(friends, activeCategory);
+
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -170,6 +176,15 @@ useEffect(() => {
     setActiveOptionsMenu(null);
   };
 
+  const handleFavoriteToggle = (friend) => {
+    if (friend.isFavorited) {
+      unfavoriteUser(friend.id);
+    } else {
+      favoriteUser(friend.id);
+    }
+    setActiveOptionsMenu(null);
+  };
+
   const handleLimitToggle = (friendId) => {
     toggleLimit(friendId, chatLimits[friendId]);
     setActiveOptionsMenu(null);
@@ -184,6 +199,10 @@ useEffect(() => {
     setActiveOptionsMenu(null);
   };
 
+  const handleGlobalChatClick = () => {
+    navigate(`/app/chat`, { state: { friendId: 'global' } });
+  }
+
 
   if (loading) {
     return <div>Loading friends...</div>;
@@ -193,7 +212,8 @@ useEffect(() => {
     return <div className="error-message">{error}</div>;
   }
 
-  const filteredFriends = friends.filter(friend => !blockedUsers.includes(friend.id));
+  const filteredFriends = categorizedFriends.filter(friend => !blockedUsers.includes(friend.id));
+  const favoritedFriends = friends.filter(friend => friend.isFavorited && !blockedUsers.includes(friend.id));
 
   return (
     <div className="container">
@@ -202,13 +222,13 @@ useEffect(() => {
         <h2>Direct Messages</h2>
 
         <div className="dm-list">
-          {filteredFriends.map((friend) => (
+          {favoritedFriends.map((friend) => (
             <div
               className="dm"
               key={friend.id}
               onClick={() => handleChatClick(friend.id)}
             >
-              <img src={friend.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'} alt={friend.name} />
+              <Avatar src={friend.avatar} alt={friend.name} />
               <span>{friend.name}</span>
               {unreadCounts[friend.id] > 0 && (
                 <span className="unread-count">{unreadCounts[friend.id]}</span>
@@ -223,7 +243,7 @@ useEffect(() => {
           </div>
           {user && userProfile && (
             <div className="user" onClick={() => navigate("/app/account")}>
-              <img src={userProfile.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'} alt="User" />
+              <Avatar src={userProfile.avatar} alt="User" />
               <span>{user.displayName}</span>
             </div>
           )}
@@ -247,7 +267,7 @@ useEffect(() => {
                 {notifications.length > 0 ? (
                   notifications.map(notif => (
                     <div key={notif.id} className="notification-item">
-                      <img src={notif.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'} alt="avatar" />
+                      <Avatar src={notif.avatar} alt="avatar" />
                       <span>{notif.title}</span>
                       {notif.type === 'friendRequest' && (
                         <div className="notification-actions">
@@ -268,15 +288,19 @@ useEffect(() => {
 
         <FriendRequests />
 
+        <ChatCategoryTabs activeCategory={activeCategory} setActiveCategory={setActiveCategory} />
+
         <div className="friends-container">
-          {filteredFriends.length === 0 ? (
+        {activeCategory === 'Global' ? (
+          <button onClick={handleGlobalChatClick} className="global-chat-btn">Join Global Chat</button>
+        ) : filteredFriends.length === 0 ? (
                 <div className="no-friends-message">
                     <p>You haven't added any friends yet. Use the "Add Friend" button to connect with others.</p>
                 </div>
             ) : (
                 filteredFriends.map((friend) => (
                     <div className="friend-card" key={friend.id}>
-                        <img src={friend.avatar || 'https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Flogo.png?alt=media&token=15ac7dfc-d970-49f2-a9c6-429dd0656f0a'} alt={friend.name} />
+                        <Avatar src={friend.avatar} alt={friend.name} />
                         <div className="friend-info">
                             <span className="friend-name">{friend.name}</span>
                             {unreadCounts[friend.id] > 0 && (
@@ -294,6 +318,9 @@ useEffect(() => {
                                   <div className="options-menu-item" onClick={() => handleUnfriend(friend.id)}>Unfriend</div>
                                   <div className="options-menu-item" onClick={() => handleMuteToggle(friend)}>
                                     {friend.isMuted ? 'Unmute' : 'Mute'}
+                                  </div>
+                                  <div className="options-menu-item" onClick={() => handleFavoriteToggle(friend)}>
+                                    {friend.isFavorited ? 'Unfavorite' : 'Favorite'}
                                   </div>
                                   <div className="options-menu-item" onClick={() => handleLimitToggle(friend.id)}>
                                     {chatLimits[friend.id] ? 'Disable Limiting' : 'Limit Notifications'}
