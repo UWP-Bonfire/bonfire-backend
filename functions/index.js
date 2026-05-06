@@ -43,7 +43,9 @@ exports.autoFriendBot = functions.auth.user().onCreate(async (user) => {
         batch.set(welcomeMsgRef, {
             text: "Hi there! I'm ZaiDBot your Bonfire AI assistant. How can I help you today?",
             senderId: BOT_UID,
-            timestamp: admin.firestore.FieldValue.serverTimestamp()
+            timestamp: admin.firestore.FieldValue.serverTimestamp(),
+            displayName: "ZaiDBot",
+            photoURL: "https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Ficon12.png?alt=media&token=86864bcf-69e4-4195-a494-5a02823d8477"
         });
 
         await batch.commit();
@@ -100,14 +102,18 @@ exports.onBotMessage = functions.firestore
                  return admin.firestore().collection('chats').doc(chatId).collection('messages').add({
                      text: "I received your message, but I'm having trouble formulating a response.",
                      senderId: BOT_UID,
-                     timestamp: admin.firestore.FieldValue.serverTimestamp()
+                     timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                     displayName: "ZaiDBot",
+                     photoURL: "https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Ficon12.png?alt=media&token=86864bcf-69e4-4195-a494-5a02823d8477" 
                  });
             }
 
             return admin.firestore().collection('chats').doc(chatId).collection('messages').add({
                 text: botText,
                 senderId: BOT_UID,
-                timestamp: admin.firestore.FieldValue.serverTimestamp()
+                timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                displayName: "ZaiDBot",
+                photoURL: "https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Ficon12.png?alt=media&token=86864bcf-69e4-4195-a494-5a02823d8477"
             });
 
         } catch (error) {
@@ -115,7 +121,9 @@ exports.onBotMessage = functions.firestore
             return admin.firestore().collection('chats').doc(chatId).collection('messages').add({
                 text: "I'm having a little trouble connecting to my brain right now. Please try again in a moment.",
                 senderId: BOT_UID,
-                timestamp: admin.firestore.FieldValue.serverTimestamp()
+                timestamp: admin.firestore.FieldValue.serverTimestamp(),
+                displayName: "ZaiDBot",
+                photoURL: "https://firebasestorage.googleapis.com/v0/b/bonfire-d8db1.firebasestorage.app/o/Profile_Pictures%2Ficon12.png?alt=media&token=86864bcf-69e4-4195-a494-5a02823d8477"
             });
         }
     });
